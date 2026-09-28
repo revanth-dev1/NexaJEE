@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Nexa JEE — The ultimate JEE Main 2027 preparation desk for Nishu Kumari. High-weightage chapters, mock tests, cheat sheets, formulas, and AI doubt solver.">
+    <title>Nexa JEE — JEE Main 2027 Preparation Desk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+</head>
+<body>
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- HEADER -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <header class="header" id="header">
+        <div class="header-left">
+            <div class="logo">
+                <span class="logo-icon">🎯</span>
+                <span class="logo-text">Nexa</span>
+                <span class="logo-badge">JEE 2027</span>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="student-info">
+                <span class="student-label">Student</span>
+                <span class="student-name" id="studentName">Nishu Kumari</span>
+            </div>
+            <div class="target-info">
+                <span class="target-label">Target</span>
+                <span class="target-name">JEE Main · Jan 2027</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="streak-badge" id="streakBadge">
+                <span class="streak-icon">🔥</span>
+                <span class="streak-count" id="streakCount">0</span>
+                <span class="streak-label">day streak</span>
+            </div>
+            <div class="progress-pill" id="progressPill">
+                <span class="progress-text" id="progressText">Day 1</span>
+                <div class="progress-bar-mini">
+                    <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- NAVIGATION -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <nav class="nav" id="nav">
+        <div class="nav-scroll">
+            <button class="nav-pill active" data-section="desk" id="nav-desk">
+                <span class="nav-icon">🏠</span> Desk
+            </button>
+            <button class="nav-pill" data-section="roadmap" id="nav-roadmap">
+                <span class="nav-icon">🗺️</span> Roadmap
+            </button>
+            <button class="nav-pill" data-section="chapters" id="nav-chapters">
+                <span class="nav-icon">📚</span> Chapters
+            </button>
+            <button class="nav-pill" data-section="formulas" id="nav-formulas">
+                <span class="nav-icon">📐</span> Formulas
+            </button>
+            <button class="nav-pill" data-section="pyq" id="nav-pyq">
+                <span class="nav-icon">📝</span> PYQ Analysis
+            </button>
+            <button class="nav-pill" data-section="mocktest" id="nav-mocktest">
+                <span class="nav-icon">⏱️</span> Mock Test
+            </button>
+            <button class="nav-pill" data-section="cheats" id="nav-cheats">
+                <span class="nav-icon">⚡</span> Cheat Sheets
+            </button>
+            <button class="nav-pill" data-section="badges" id="nav-badges">
+                <span class="nav-icon">🏆</span> Badges
+            </button>
+            <button class="nav-pill" data-section="doubts" id="nav-doubts">
+                <span class="nav-icon">💬</span> Doubts
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- MAIN CONTENT -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <main class="main" id="mainContent">
+
+        <!-- ═══════════ DESK SECTION ═══════════ -->
+        <section class="section section-desk active" id="section-desk">
+            <div class="desk-hero">
+                <div class="desk-hero-left">
+                    <p class="desk-greeting" id="deskGreeting">Good evening, Nishu ✨</p>
+                    <h1 class="desk-title">Your path to<br><em>IIT</em> starts here.</h1>
+                    <p class="desk-subtitle">Master Physics, Chemistry & Mathematics with a structured 16-week battle plan. Built with love, powered by data from 10 years of JEE papers.</p>
+                    <div class="desk-cta-row">
+                        <button class="btn-primary" onclick="navigateTo('roadmap')">View Roadmap →</button>
+                        <button class="btn-secondary" onclick="navigateTo('mocktest')">Start Mock Test</button>
+                    </div>
+                </div>
+                <div class="desk-hero-right">
+                    <div class="desk-stats-card">
+                        <div class="stats-card-header">
+                            <span class="stats-card-label">YOUR PATH</span>
+                            <span class="stats-card-badge">JEE Main 2027</span>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-number" id="statChapters">75</span>
+                                <span class="stat-label">Chapters</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="statFormulas">500+</span>
+                                <span class="stat-label">Formulas</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="statPYQ">1500+</span>
+                                <span class="stat-label">PYQ Solved</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="statMocks">20</span>
+                                <span class="stat-label">Mock Tests</span>
+                            </div>
+                        </div>
+                        <div class="stats-progress">
+                            <div class="stats-progress-header">
+                                <span>Overall Progress</span>
+                                <span id="overallPercent">0%</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" id="overallProgressFill" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subject cards -->
+            <div class="desk-subjects">
+                <h2 class="section-heading">Subject Dashboard</h2>
+                <div class="subject-cards">
+                    <div class="subject-card physics-card" onclick="filterChapters('physics')">
+                        <div class="subject-icon">⚛️</div>
+                        <h3>Physics</h3>
+                        <p>25 Chapters · Mechanics to Modern Physics</p>
+                        <div class="subject-progress">
+                            <div class="subject-progress-bar"><div class="subject-progress-fill" id="physicsProgress" style="width:0%"></div></div>
+                            <span class="subject-progress-text" id="physicsProgressText">0%</span>
+                        </div>
+                        <div class="subject-weightage">~30% weightage</div>
+                    </div>
+                    <div class="subject-card chemistry-card" onclick="filterChapters('chemistry')">
+                        <div class="subject-icon">🧪</div>
+                        <h3>Chemistry</h3>
+                        <p>30 Chapters · Physical, Organic & Inorganic</p>
+                        <div class="subject-progress">
+                            <div class="subject-progress-bar"><div class="subject-progress-fill" id="chemistryProgress" style="width:0%"></div></div>
+                            <span class="subject-progress-text" id="chemistryProgressText">0%</span>
+                        </div>
+                        <div class="subject-weightage">~34% weightage</div>
+                    </div>
+                    <div class="subject-card maths-card" onclick="filterChapters('maths')">
+                        <div class="subject-icon">📊</div>
+                        <h3>Mathematics</h3>
+                        <p>20 Chapters · Algebra to Calculus</p>
+                        <div class="subject-progress">
+                            <div class="subject-progress-bar"><div class="subject-progress-fill" id="mathsProgress" style="width:0%"></div></div>
+                            <span class="subject-progress-text" id="mathsProgressText">0%</span>
+                        </div>
+                        <div class="subject-weightage">~36% weightage</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick tips -->
+            <div class="desk-tips">
+                <div class="tip-card tip-teal">
+                    <h3>📥 Download Roadmap Excel</h3>
+                    <p>Get your complete 16-week study plan with daily topics, formulas, and revision schedule.</p>
+                    <button class="btn-tip" onclick="downloadExcel()">Download the workbook</button>
+                </div>
+                <div class="tip-card tip-amber">
+                    <h3>🎯 Today's Priority</h3>
+                    <p id="todayPriority">Start with high-weightage chapters in Physics — Mechanics & Electrodynamics carry 40% of physics marks!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════ ROADMAP SECTION ═══════════ -->
+        <section class="section section-roadmap" id="section-roadmap">
+            <h2 class="section-heading">16-Week Battle Plan</h2>
+            <p class="section-sub">Your week-by-week roadmap to crack JEE Main 2027. Click any week to expand.</p>
+            
+            <div class="week-slider" id="weekSlider">
+                <!-- Generated by JS -->
+            </div>
+
+            <div class="roadmap-detail" id="roadmapDetail">
+                <!-- Generated by JS -->
+            </div>
+        </section>
+
+        <!-- ═══════════ CHAPTERS SECTION ═══════════ -->
+        <section class="section section-chapters" id="section-chapters">
+            <h2 class="section-heading">High-Weightage Chapters</h2>
+            <p class="section-sub">Sorted by weightage based on 10 years of JEE Main analysis. Focus on ⭐⭐⭐ first!</p>
+            
+            <div class="chapter-filters">
+                <button class="filter-pill active" data-filter="all" onclick="filterChapters('all')">All</button>
+                <button class="filter-pill" data-filter="physics" onclick="filterChapters('physics')">⚛️ Physics</button>
+                <button class="filter-pill" data-filter="chemistry" onclick="filterChapters('chemistry')">🧪 Chemistry</button>
+                <button class="filter-pill" data-filter="maths" onclick="filterChapters('maths')">📊 Maths</button>
+                <button class="filter-pill" data-filter="high" onclick="filterChapters('high')">⭐⭐⭐ High</button>
+                <button class="filter-pill" data-filter="medium" onclick="filterChapters('medium')">⭐⭐ Medium</button>
+            </div>
+
+            <div class="chapters-grid" id="chaptersGrid">
+                <!-- Generated by JS -->
+            </div>
+        </section>
+
+        <!-- ═══════════ FORMULAS SECTION ═══════════ -->
+        <section class="section section-formulas" id="section-formulas">
+            <h2 class="section-heading">Formula Vault 📐</h2>
+            <p class="section-sub">Every critical formula, highlighted by importance. <span class="highlight-badge">🔴 Must Know</span> <span class="highlight-badge medium">🟡 Important</span> <span class="highlight-badge low">🟢 Good to Know</span></p>
+            
+            <div class="formula-filters">
+                <button class="filter-pill active" data-filter="all" onclick="filterFormulas('all')">All</button>
+                <button class="filter-pill" data-filter="physics" onclick="filterFormulas('physics')">⚛️ Physics</button>
+                <button class="filter-pill" data-filter="chemistry" onclick="filterFormulas('chemistry')">🧪 Chemistry</button>
+                <button class="filter-pill" data-filter="maths" onclick="filterFormulas('maths')">📊 Maths</button>
+                <button class="filter-pill" data-filter="critical" onclick="filterFormulas('critical')">🔴 Critical</button>
+            </div>
+
+            <div class="formulas-container" id="formulasContainer">
+                <!-- Generated by JS -->
+            </div>
+        </section>
+
+        <!-- ═══════════ PYQ ANALYSIS SECTION ═══════════ -->
+        <section class="section section-pyq" id="section-pyq">
+            <h2 class="section-heading">Previous Year Analysis (2015–2025)</h2>
+            <p class="section-sub">Data-driven breakdown of 10 years of JEE Main papers. Know where to focus!</p>
+
+            <div class="pyq-overview">
+                <div class="pyq-stat-card">
+                    <span class="pyq-stat-number">1500+</span>
+                    <span class="pyq-stat-label">Questions Analyzed</span>
+                </div>
+                <div class="pyq-stat-card">
+                    <span class="pyq-stat-number">75</span>
+                    <span class="pyq-stat-label">Chapters Covered</span>
+                </div>
+                <div class="pyq-stat-card">
+                    <span class="pyq-stat-number">10</span>
+                    <span class="pyq-stat-label">Years of Data</span>
+                </div>
+            </div>
+
+            <div class="pyq-subject-tabs">
+                <button class="pyq-tab active" onclick="showPYQ('physics')">⚛️ Physics</button>
+                <button class="pyq-tab" onclick="showPYQ('chemistry')">🧪 Chemistry</button>
+                <button class="pyq-tab" onclick="showPYQ('maths')">📊 Maths</button>
+            </div>
+
+            <div class="pyq-content" id="pyqContent">
+                <!-- Generated by JS -->
+            </div>
+
+            <div class="pyq-predictions">
+                <h3 class="pyq-predictions-title">🔮 Predicted Hot Topics — JEE Main Jan 2027</h3>
+                <p class="pyq-predictions-sub">Based on trend analysis and pattern recognition from 10 years of data</p>
+                <div class="predictions-grid" id="predictionsGrid">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════ MOCK TEST SECTION ═══════════ -->
+        <section class="section section-mocktest" id="section-mocktest">
+            <div class="mock-landing" id="mockLanding">
+                <h2 class="section-heading">Mock Test Arena ⏱️</h2>
+                <p class="section-sub">Simulated JEE Main exam experience. 180 minutes. 75 questions. Real pressure.</p>
+
+                <div class="mock-modes">
+                    <div class="mock-mode-card" onclick="startMockTest('full')">
+                        <div class="mock-mode-icon">📋</div>
+                        <h3>Full Mock Test</h3>
+                        <p>75 Questions · 180 Minutes<br>Physics + Chemistry + Maths</p>
+                        <span class="mock-mode-tag">Recommended</span>
+                    </div>
+                    <div class="mock-mode-card" onclick="startMockTest('physics')">
+                        <div class="mock-mode-icon">⚛️</div>
+                        <h3>Physics Only</h3>
+                        <p>25 Questions · 60 Minutes<br>Chapter-wise or Full</p>
+                    </div>
+                    <div class="mock-mode-card" onclick="startMockTest('chemistry')">
+                        <div class="mock-mode-icon">🧪</div>
+                        <h3>Chemistry Only</h3>
+                        <p>25 Questions · 60 Minutes<br>Chapter-wise or Full</p>
+                    </div>
+                    <div class="mock-mode-card" onclick="startMockTest('maths')">
+                        <div class="mock-mode-icon">📊</div>
+                        <h3>Maths Only</h3>
+                        <p>25 Questions · 60 Minutes<br>Chapter-wise or Full</p>
+                    </div>
+                </div>
+
+                <!-- Past test results -->
+                <div class="mock-history" id="mockHistory">
+                    <h3>📊 Your Test History</h3>
+                    <div class="mock-history-list" id="mockHistoryList">
+                        <p class="empty-state">No tests taken yet. Start your first mock!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Test UI (hidden initially) -->
+            <div class="mock-active" id="mockActive" style="display:none;">
+                <div class="mock-header">
+                    <div class="mock-timer-container">
+                        <span class="mock-timer-icon">⏱️</span>
+                        <span class="mock-timer" id="mockTimer">03:00:00</span>
+                    </div>
+                    <div class="mock-question-nav" id="mockQuestionNav">
+                        <!-- Generated by JS -->
+                    </div>
+                    <button class="btn-submit-test" id="btnSubmitTest" onclick="submitMockTest()">Submit Test</button>
+                </div>
+                <div class="mock-question-area" id="mockQuestionArea">
+                    <!-- Generated by JS -->
+                </div>
+                <div class="mock-controls">
+                    <button class="btn-secondary" id="btnPrevQ" onclick="prevQuestion()">← Previous</button>
+                    <button class="btn-mark" id="btnMarkQ" onclick="markQuestion()">🔖 Mark for Review</button>
+                    <button class="btn-clear" id="btnClearQ" onclick="clearAnswer()">✖ Clear</button>
+                    <button class="btn-primary" id="btnNextQ" onclick="nextQuestion()">Next →</button>
+                </div>
+            </div>
+
+            <!-- Test Results UI (hidden initially) -->
+            <div class="mock-results" id="mockResults" style="display:none;">
+                <!-- Generated by JS -->
+            </div>
+        </section>
+
+        <!-- ═══════════ CHEAT SHEETS SECTION ═══════════ -->
+        <section class="section section-cheats" id="section-cheats">
+            <h2 class="section-heading">Cheat Sheets ⚡</h2>
+            <p class="section-sub">Quick-reference cards with tricks, shortcuts, and exam strategies</p>
+            
+            <div class="cheats-tabs">
+                <button class="cheats-tab active" onclick="showCheatSheet('tricks')">💡 Tricks & Shortcuts</button>
+                <button class="cheats-tab" onclick="showCheatSheet('strategy')">🎯 Exam Strategy</button>
+                <button class="cheats-tab" onclick="showCheatSheet('mistakes')">⚠️ Common Mistakes</button>
+                <button class="cheats-tab" onclick="showCheatSheet('lastmin')">⏰ Last-Minute Tips</button>
+            </div>
+
+            <div class="cheats-content" id="cheatsContent">
+                <!-- Generated by JS -->
+            </div>
+        </section>
+
+        <!-- ═══════════ BADGES SECTION ═══════════ -->
+        <section class="section section-badges" id="section-badges">
+            <h2 class="section-heading">Nishu's Trophy Room 🏆</h2>
+            <p class="section-sub">Earn badges by completing milestones. Show your progress!</p>
+
+            <div class="badges-overview">
+                <div class="badges-score-card">
+                    <div class="badges-score-number" id="totalBadges">0</div>
+                    <div class="badges-score-label">Badges Earned</div>
+                </div>
+                <div class="badges-rank-card">
+                    <div class="badges-rank-title">Current Rank</div>
+                    <div class="badges-rank" id="currentRank">🌱 Beginner</div>
+                </div>
+                <div class="badges-xp-card">
+                    <div class="badges-xp-label">Experience Points</div>
+                    <div class="badges-xp" id="totalXP">0 XP</div>
+                    <div class="badges-xp-bar">
+                        <div class="badges-xp-fill" id="xpFill" style="width:0%"></div>
+                    </div>
+                    <div class="badges-xp-next" id="xpNext">Next: 100 XP for Bronze</div>
+                </div>
+            </div>
+
+            <div class="badges-grid" id="badgesGrid">
+                <!-- Generated by JS -->
+            </div>
+        </section>
+
+        <!-- ═══════════ DOUBTS SECTION ═══════════ -->
+        <section class="section section-doubts" id="section-doubts">
+            <h2 class="section-heading">Ask Your Doubt 💬</h2>
+            <p class="section-sub">Your AI teacher is here 24/7. Ask anything about JEE prep!</p>
+
+            <div class="doubt-quick-pills">
+                <button class="doubt-pill" onclick="askQuickDoubt('What should I study today?')">What should I study today?</button>
+                <button class="doubt-pill" onclick="askQuickDoubt('Explain Integration by Parts')">Explain Integration by Parts</button>
+                <button class="doubt-pill" onclick="askQuickDoubt('Give me tips for Organic Chemistry')">Tips for Organic Chemistry</button>
+                <button class="doubt-pill" onclick="askQuickDoubt('Quiz me on Mechanics')">Quiz me on Mechanics</button>
+                <button class="doubt-pill" onclick="askQuickDoubt('How to manage time in exam?')">Time management tips</button>
+            </div>
+
+            <div class="doubt-chat" id="doubtChat">
+                <div class="doubt-messages" id="doubtMessages">
+                    <div class="doubt-message bot">
+                        <div class="doubt-avatar">👩‍🏫</div>
+                        <div class="doubt-bubble">
+                            <strong>Namaste Nishu! 🙏</strong><br><br>
+                            I'm your personal JEE mentor. Ask me anything — whether it's a concept doubt, formula, strategy, or just motivation. I'm here for you!<br><br>
+                            <em>Try one of the quick questions above, or type your own below.</em>
+                        </div>
+                    </div>
+                </div>
+                <div class="doubt-input-area">
+                    <input type="text" class="doubt-input" id="doubtInput" placeholder="Type your doubt here..." onkeypress="if(event.key==='Enter') sendDoubt()">
+                    <button class="doubt-send" onclick="sendDoubt()">Send</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- FOOTER -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <footer class="footer">
+        <p>Built with care for <strong>Nishu Kumari</strong> · Nexa JEE 2027 · <em>All the best for your journey!</em> 🚀</p>
+        <p style="margin-top:6px; font-size:12px; color:var(--text-muted);">Designed and Developed by <strong>Revanth</strong></p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
