@@ -251,7 +251,7 @@ button { cursor: pointer; font-family: inherit; border: none; outline: none; }
     max-width: 100%;
 }
 .nav-scroll::-webkit-scrollbar { display: none; }
-@media (min-width: 1320px) {
+@media (min-width: 1600px) {
     .nav-scroll { justify-content: center; }
 }
 
@@ -3904,12 +3904,46 @@ button { cursor: pointer; font-family: inherit; border: none; outline: none; }
     .admin-metrics-grid { grid-template-columns: repeat(2, 1fr); }
     .admin-reset-grid { grid-template-columns: 1fr; }
 }
+@media (max-width: 768px) {
+    .admin-supervision-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px 14px;
+        gap: 8px;
+    }
+    .admin-banner-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .admin-banner-actions button {
+        flex: 1 1 auto;
+        min-width: 120px;
+    }
+    .admin-panel-header {
+        flex-direction: column;
+        gap: 14px;
+    }
+    .admin-header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .admin-header-actions button {
+        flex: 1 1 auto;
+    }
+    .admin-reset-actions {
+        flex-wrap: wrap;
+    }
+    .admin-reset-actions button {
+        flex: 1 1 auto;
+        min-width: 130px;
+        text-align: center;
+        justify-content: center;
+    }
+}
 @media (max-width: 640px) {
     .admin-metrics-grid { grid-template-columns: 1fr; }
     .admin-panel-header { padding: 20px; }
 }
-
-
 
 
 

@@ -2929,8 +2929,8 @@ function renderAdminPanel() {
             <div class="admin-metric-card" style="border-top:3px solid var(--accent-teal);">
                 <div class="admin-metric-icon">📚</div>
                 <div class="admin-metric-label">Syllabus Covered</div>
-                <div class="admin-metric-value">${report.overallSyllabus.completedChapters} <span style="font-size:16px; color:var(--text-muted); font-weight:500;">/ ${report.overallSyllabus.totalChapters}</span></div>
-                <div class="admin-metric-sub">${report.overallSyllabus.percentage}% syllabus completed across 3 subjects</div>
+                <div class="admin-metric-value">${report.overallProgress.completedChapters} <span style="font-size:16px; color:var(--text-muted); font-weight:500;">/ ${report.overallProgress.totalChapters}</span></div>
+                <div class="admin-metric-sub">${report.overallProgress.percentage}% syllabus completed across 3 subjects</div>
             </div>
             <div class="admin-metric-card" style="border-top:3px solid var(--accent-blue);">
                 <div class="admin-metric-icon">⏱️</div>
@@ -2960,28 +2960,28 @@ function renderAdminPanel() {
             <div class="admin-subject-row">
                 <div class="admin-subject-row-header">
                     <span style="color:var(--physics-color);">⚛️ Physics</span>
-                    <span>${report.subjects.physics.completed} / ${report.subjects.physics.total} Chapters (${report.subjects.physics.percentage}%)</span>
+                    <span>${report.overallProgress.physics.completed} / ${report.overallProgress.physics.total} Chapters (${report.overallProgress.physics.percentage}%)</span>
                 </div>
                 <div class="admin-subject-track">
-                    <div class="admin-subject-fill" style="width:${report.subjects.physics.percentage}%; background:linear-gradient(90deg, var(--physics-color), var(--accent-blue));"></div>
+                    <div class="admin-subject-fill" style="width:${report.overallProgress.physics.percentage}%; background:linear-gradient(90deg, var(--physics-color), var(--accent-blue));"></div>
                 </div>
             </div>
             <div class="admin-subject-row">
                 <div class="admin-subject-row-header">
                     <span style="color:var(--chemistry-color);">🧪 Chemistry</span>
-                    <span>${report.subjects.chemistry.completed} / ${report.subjects.chemistry.total} Chapters (${report.subjects.chemistry.percentage}%)</span>
+                    <span>${report.overallProgress.chemistry.completed} / ${report.overallProgress.chemistry.total} Chapters (${report.overallProgress.chemistry.percentage}%)</span>
                 </div>
                 <div class="admin-subject-track">
-                    <div class="admin-subject-fill" style="width:${report.subjects.chemistry.percentage}%; background:linear-gradient(90deg, var(--chemistry-color), var(--accent-teal));"></div>
+                    <div class="admin-subject-fill" style="width:${report.overallProgress.chemistry.percentage}%; background:linear-gradient(90deg, var(--chemistry-color), var(--accent-teal));"></div>
                 </div>
             </div>
             <div class="admin-subject-row">
                 <div class="admin-subject-row-header">
                     <span style="color:var(--maths-color);">📐 Mathematics</span>
-                    <span>${report.subjects.maths.completed} / ${report.subjects.maths.total} Chapters (${report.subjects.maths.percentage}%)</span>
+                    <span>${report.overallProgress.mathematics.completed} / ${report.overallProgress.mathematics.total} Chapters (${report.overallProgress.mathematics.percentage}%)</span>
                 </div>
                 <div class="admin-subject-track">
-                    <div class="admin-subject-fill" style="width:${report.subjects.maths.percentage}%; background:linear-gradient(90deg, var(--maths-color), var(--accent-purple));"></div>
+                    <div class="admin-subject-fill" style="width:${report.overallProgress.mathematics.percentage}%; background:linear-gradient(90deg, var(--maths-color), var(--accent-violet));"></div>
                 </div>
             </div>
         `;
@@ -3155,7 +3155,7 @@ function renderAdminPanel() {
                 badgeBg: 'rgba(79, 209, 197, 0.15)',
                 badgeColor: 'var(--accent-teal)',
                 icon: '⏱️',
-                desc: `${t.subject.toUpperCase()} Mock Test: ${t.score}/${t.total} (${t.pct}%)`,
+                desc: `${(t.mode || 'mixed').toUpperCase()} Mock Test: ${t.marks}/${t.maxMarks} marks (${t.percentage}%)`,
                 date: t.date || 'Recent'
             });
         });
