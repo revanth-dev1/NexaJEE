@@ -433,6 +433,32 @@
         <p style="margin-top:6px; font-size:12px; color:var(--text-muted);">Designed and Developed by <strong>Revanth</strong></p>
     </footer>
 
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TOP FACULTY MASTERCLASS MODAL (TOPIC EXPLORER)  -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="masterclass-modal-backdrop" id="topicMasterclassModal" onclick="closeMasterclass(event)">
+        <div class="masterclass-modal" onclick="event.stopPropagation()">
+            <div class="masterclass-header">
+                <div class="masterclass-header-left">
+                    <div class="masterclass-badge-row">
+                        <span class="masterclass-badge">👨‍🏫 Top Faculty Masterclass</span>
+                        <span class="masterclass-kota-badge">⚡ Kota Secret Notes</span>
+                    </div>
+                    <h2 class="masterclass-title" id="masterclassTopicTitle">Newton's Laws of Motion</h2>
+                    <div class="masterclass-meta" id="masterclassMeta">
+                        <span class="masterclass-subject-tag" id="masterclassSubject">Physics</span>
+                        <span class="masterclass-chapter-tag" id="masterclassChapter">Mechanics</span>
+                    </div>
+                </div>
+                <button class="masterclass-close" onclick="closeMasterclass()" title="Close (Esc)">×</button>
+            </div>
+            
+            <div class="masterclass-body" id="masterclassBody">
+                <!-- Dynamically populated by openTopicMasterclass() -->
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="data.js"></script>
     <script src="app.js"></script>

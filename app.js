@@ -225,9 +225,13 @@ function renderChapters(filter) {
                 
                 ${details ? `
                     <!-- SYLLABUS -->
-                    <h4 class="chapter-detail-heading">📋 Complete Syllabus (${details.syllabus.length} topics)</h4>
+                    <h4 class="chapter-detail-heading">📋 Complete Syllabus (${details.syllabus.length} topics) — <span style="font-weight:400; font-size:11px; color:var(--accent-teal);">👆 Click any topic for Faculty Masterclass</span></h4>
                     <div class="chapter-detail-topics">
-                        ${details.syllabus.map(t => `<span class="chapter-topic-tag chapter-topic-tag-link" onclick="event.stopPropagation(); jumpToFormulaTopic('${t}', '${ch.subject}')" title="Click to find related formulas">${t}</span>`).join('')}
+                        ${details.syllabus.map(t => {
+                            const safeT = t.replace(/'/g, "\\'");
+                            const safeCh = ch.name.replace(/'/g, "\\'");
+                            return `<span class="chapter-topic-tag chapter-topic-tag-link" onclick="event.stopPropagation(); openTopicMasterclass('${safeT}', '${safeCh}', '${ch.subject}')" title="Click for Top Faculty explanation"><span style="margin-right:4px;">💡</span>${t}</span>`;
+                        }).join('')}
                     </div>
                     
                     <!-- MOST ASKED QUESTIONS -->
@@ -248,9 +252,14 @@ function renderChapters(filter) {
                     </div>
                 ` : `
                     <!-- FALLBACK: Basic topics -->
-                    <h4 class="chapter-detail-heading">📖 Key Topics</h4>
+                    <h4 class="chapter-detail-heading">📖 Key Topics — <span style="font-weight:400; font-size:11px; color:var(--accent-teal);">👆 Click any topic for Faculty Masterclass</span></h4>
                     <div class="chapter-detail-topics">
-                        ${ch.topics.split(', ').map(t => `<span class="chapter-topic-tag">${t.trim()}</span>`).join('')}
+                        ${ch.topics.split(', ').map(t => {
+                            const trimmed = t.trim();
+                            const safeT = trimmed.replace(/'/g, "\\'");
+                            const safeCh = ch.name.replace(/'/g, "\\'");
+                            return `<span class="chapter-topic-tag chapter-topic-tag-link" onclick="event.stopPropagation(); openTopicMasterclass('${safeT}', '${safeCh}', '${ch.subject}')" title="Click for Top Faculty explanation"><span style="margin-right:4px;">💡</span>${trimmed}</span>`;
+                        }).join('')}
                     </div>
                 `}
                 
@@ -341,6 +350,202 @@ function toggleChapter(chId) {
     updateProgress();
     renderChapters(state.currentSection === 'chapters' ? 
         (document.querySelector('.chapter-filters .filter-pill.active')?.dataset.filter || 'all') : 'all');
+}
+
+// ─── TOPIC MASTERCLASS (LECTURER EXPLANATION ENGINE) ───
+function openTopicMasterclass(topicName, chapterName, subject) {
+    const modal = document.getElementById('topicMasterclassModal');
+    if (!modal) return;
+    
+    // Set headers
+    const titleEl = document.getElementById('masterclassTopicTitle');
+    if (titleEl) titleEl.textContent = topicName;
+    
+    const subjEl = document.getElementById('masterclassSubject');
+    if (subjEl) {
+        subjEl.textContent = subject.toUpperCase();
+        const colors = { physics: 'var(--physics-color)', chemistry: 'var(--chemistry-color)', maths: 'var(--maths-color)' };
+        const bgs = { physics: 'var(--physics-dim)', chemistry: 'var(--chemistry-dim)', maths: 'var(--maths-dim)' };
+        subjEl.style.color = colors[subject] || 'var(--accent-teal)';
+        subjEl.style.background = bgs[subject] || 'var(--accent-teal-dim)';
+    }
+    
+    const chEl = document.getElementById('masterclassChapter');
+    if (chEl) chEl.textContent = `Chapter: ${chapterName}`;
+    
+    // Resolve Masterclass Content
+    const data = getTopicMasterclassContent(topicName, chapterName, subject);
+    
+    const bodyEl = document.getElementById('masterclassBody');
+    bodyEl.innerHTML = `
+        <!-- Faculty Quote / Core Law -->
+        <div class="masterclass-quote-card">
+            <div class="masterclass-quote-icon">👨‍🏫</div>
+            <div class="masterclass-quote-text">"${data.quote}"</div>
+        </div>
+        
+        <!-- Real-World Intuition -->
+        <div class="masterclass-section">
+            <div class="masterclass-section-title">💡 Real-World Intuition (The Way Kota Top Lecturers Teach It)</div>
+            <div class="masterclass-intuition-text">${data.intuition}</div>
+        </div>
+        
+        <!-- Core Formulas & Concept Desk -->
+        ${data.coreFormulas && data.coreFormulas.length > 0 ? `
+            <div class="masterclass-section">
+                <div class="masterclass-section-title">📐 Core Concept Desk & High-Yield Formulas</div>
+                <div class="masterclass-formula-grid">
+                    ${data.coreFormulas.map(f => `
+                        <div class="masterclass-formula-item">
+                            <span class="masterclass-formula-label">${f.label}</span>
+                            <code class="masterclass-formula-code">${f.formula}</code>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        ` : ''}
+        
+        <!-- Kota Faculty Shortcuts & Tricks -->
+        ${data.kotaTricks && data.kotaTricks.length > 0 ? `
+            <div class="masterclass-section tricks">
+                <div class="masterclass-section-title">⚡ Kota Faculty Speed Secrets & Inspection Tricks</div>
+                <div class="masterclass-trick-list">
+                    ${data.kotaTricks.map(tr => `<div class="masterclass-trick-item">${tr}</div>`).join('')}
+                </div>
+            </div>
+        ` : ''}
+        
+        <!-- NTA Traps & Mistakes -->
+        ${data.commonTraps && data.commonTraps.length > 0 ? `
+            <div class="masterclass-section traps">
+                <div class="masterclass-section-title">🚨 JEE Main Traps & Common Blunders to Avoid</div>
+                <div class="masterclass-trap-list">
+                    ${data.commonTraps.map(tr => `<div class="masterclass-trap-item">${tr}</div>`).join('')}
+                </div>
+            </div>
+        ` : ''}
+        
+        <!-- Solved Benchmark Problem -->
+        ${data.benchmarkQuestion ? `
+            <div class="masterclass-section">
+                <div class="masterclass-section-title">📝 Standard JEE Benchmark Question & Step-by-Step Solution</div>
+                <div class="masterclass-benchmark-card">
+                    <div class="masterclass-q-title">Problem Statement</div>
+                    <div class="masterclass-q-text">${data.benchmarkQuestion.question}</div>
+                    <div class="masterclass-q-title" style="color:var(--accent-amber);">Faculty Approach & Step-by-Step Breakdown</div>
+                    <div class="masterclass-approach">${data.benchmarkQuestion.approach}</div>
+                    <div class="masterclass-ans-badge">
+                        <span>🎯 Correct Result:</span>
+                        <span>${data.benchmarkQuestion.answer}</span>
+                    </div>
+                </div>
+            </div>
+        ` : ''}
+        
+        <!-- Quick Action Bar -->
+        <div class="masterclass-actions">
+            <button class="btn-masterclass-action primary" onclick="askAiAboutTopic('${topicName.replace(/'/g, "\\'")}', '${subject}')">
+                🤖 Ask AI Tutor about "${topicName}"
+            </button>
+            <button class="btn-masterclass-action secondary" onclick="closeMasterclass(); jumpToFormulaTopic('${topicName.replace(/'/g, "\\'")}', '${subject}');">
+                📐 Open Related Formulas
+            </button>
+            <button class="btn-masterclass-action secondary" onclick="closeMasterclass(); startMockTest('${subject}')">
+                ⏱️ Practice ${subject.toUpperCase()} Test
+            </button>
+        </div>
+    `;
+    
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMasterclass(e) {
+    if (e && e.target && !e.target.classList.contains('masterclass-modal-backdrop') && !e.target.classList.contains('masterclass-close')) {
+        return;
+    }
+    const modal = document.getElementById('topicMasterclassModal');
+    if (modal) {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+}
+
+// Global Escape Key Listener for Masterclass Modal
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMasterclass();
+});
+
+function askAiAboutTopic(topicName, subject) {
+    closeMasterclass();
+    navigateTo('doubts');
+    setTimeout(() => {
+        const input = document.getElementById('doubtInput');
+        if (input) {
+            input.value = `Explain ${topicName} in ${subject} with a simple shortcut for JEE Main`;
+            sendDoubt();
+        }
+    }, 200);
+}
+
+function jumpToFormulaTopic(topicName, subject) {
+    navigateTo('formulas');
+    renderFormulas(subject || 'all');
+    setTimeout(() => {
+        const input = document.getElementById('formulaSearch');
+        if (input) {
+            const firstWord = topicName.split(/[\s,&/()—\-]+/)[0] || topicName;
+            input.value = firstWord;
+            searchFormulas();
+        }
+    }, 150);
+}
+
+// Masterclass Content Resolver with Smart Synthesis Fallback
+function getTopicMasterclassContent(topicName, chapterName, subject) {
+    if (typeof topicMasterclassData !== 'undefined') {
+        // Direct match
+        if (topicMasterclassData[topicName]) {
+            return topicMasterclassData[topicName];
+        }
+        // Case-insensitive or substring match
+        const lower = topicName.toLowerCase();
+        for (const [key, val] of Object.entries(topicMasterclassData)) {
+            const kLower = key.toLowerCase();
+            if (lower.includes(kLower) || kLower.includes(lower)) {
+                return val;
+            }
+            const words = lower.split(/[\s,&/()—\-]+/).filter(w => w.length > 3);
+            if (words.some(w => kLower.includes(w))) {
+                return val;
+            }
+        }
+    }
+    
+    // Dynamic Synthesis: High-Yield Lecturer Explanation for any syllabus topic
+    const related = getRelatedFormulas(topicName, subject);
+    const formulaList = related.length > 0 ? related.map(f => ({ label: f.name, formula: f.formula })) : [
+        { label: "Core Formulation", formula: `${topicName} — standard relationship in ${chapterName}` }
+    ];
+    
+    return {
+        quote: `In JEE Main, mastering ${topicName} is about grasping the underlying physical/mathematical mechanism before touching pencil to paper!`,
+        intuition: `When approaching ${topicName} in ${chapterName} (${subject.toUpperCase()}), always ask: 'What fundamental conservation law or geometrical constraint controls this system?' Whether it is conservation of energy, electric flux, or algebraic monotonicity, visualizing the system first eliminates 70% of redundant calculations. Once the governing equations are set up from first principles, algebraic simplification becomes direct and confident.`,
+        coreFormulas: formulaList,
+        kotaTricks: [
+            `⚡ Inspection & Extreme Case Analysis: Before solving complex equations for ${topicName}, test limiting boundary conditions (e.g., zero, infinity, or symmetric points). In JEE multiple-choice questions, this technique often eliminates two wrong options immediately!`,
+            `⚡ Proportionality & Dimension Check: Always verify units and dimensions of your derived expression to catch sign or power errors before selecting your answer.`
+        ],
+        commonTraps: [
+            `🚨 Watch out for strict domain limitations and boundary assumptions when applying standard formulas in ${topicName}.`,
+            `🚨 Double-check sign conventions (+ / - signs, direction of vector components, and coordinate axis definitions).`
+        ],
+        benchmarkQuestion: {
+            question: `A typical JEE Main problem on ${topicName} in ${chapterName} tests the direct application of standard formulas under non-ideal or composite conditions.`,
+            approach: `1. Identify the given parameters and state variables.\n2. Write down the fundamental governing law for ${topicName}.\n3. Substitute given constraints and boundary conditions.\n4. Solve algebraically and confirm the units match.`,
+            answer: `Solved through systematic balance of governing equations.`
+        }
+    };
 }
 
 // ─── FORMULAS RENDERING ─────────────────────────

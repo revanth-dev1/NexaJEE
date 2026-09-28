@@ -1416,3 +1416,436 @@ const chapterDetailsData = {
     }
 };
 
+// ─── TOPIC MASTERCLASSES (TOP FACULTY EXPLANATIONS) ───
+const topicMasterclassData = {
+    // ════════ PHYSICS: MECHANICS (ALL 19 TOPICS) ════════
+    "Newton's Laws of Motion": {
+        quote: "Forces do not cause motion — forces cause CHANGE in motion! Grasp this and half of Mechanics is solved.",
+        intuition: "Think of an object like the world's most stubborn couch potato: it hates acceleration. If it is resting, it wants to stay resting. If it is cruising at 60 km/h, it wants to cruise forever without burning fuel (Inertia, 1st Law). When you do push it, how briskly it speeds up depends on your net push divided by its inertia: a = F_net / m (2nd Law). And remember: forces are interactions, never solo acts. If you lean against a wall, the wall pushes right back on your hand with identical magnitude (3rd Law).",
+        coreFormulas: [
+            { label: "2nd Law (General)", formula: "F_net = dp/dt = m·a + v·(dm/dt) [Use m·a when mass is constant, v_rel·(dm/dt) for rockets]" },
+            { label: "Impulse-Momentum", formula: "J = ∫ F dt = Δp = p_final - p_initial" },
+            { label: "3rd Law Pair", formula: "F_AB = - F_BA (Always on two DIFFERENT objects, never on the same object)" }
+        ],
+        kotaTricks: [
+            "⚡ The 'Whole System' Shortcut: When multiple connected blocks move together with common acceleration, combine them! a = (Net Unbalanced External Driving Force) / (Total Mass). Internal tensions & normal forces vanish from the equation.",
+            "⚡ Pulley Acceleration Quick Trick: a = (Supporting weights - Opposing weights)·g / (Total mass in motion)."
+        ],
+        commonTraps: [
+            "🚨 Action and Reaction NEVER cancel each other out! Normal force from the table and gravity on a block are NOT action-reaction pairs because both act on the same block.",
+            "🚨 Forgetting to resolve vectors along the direction of motion vs perpendicular to motion before writing ΣF = ma."
+        ],
+        benchmarkQuestion: {
+            question: "Three blocks of mass 2 kg, 3 kg, and 5 kg are in contact on a frictionless table. A horizontal push of 20 N is applied to the 2 kg block. What is the contact force between the 3 kg and 5 kg block?",
+            approach: "1. Whole System: a = F_ext / (m1 + m2 + m3) = 20 / (2 + 3 + 5) = 2 m/s².\n2. Isolate the 5 kg block: The ONLY horizontal force accelerating the 5 kg block is the contact push N from the 3 kg block.\n3. N = m5 · a = 5 · 2 = 10 N.",
+            answer: "10 N (Solved in 25 seconds without writing 3 separate equations!)"
+        }
+    },
+
+    "Free Body Diagrams": {
+        quote: "Draw the FBD correctly, and Newton does the rest. Mess up the FBD, and no math can rescue you.",
+        intuition: "An FBD is an X-ray of ONE isolated object. You mentally erase the entire universe, draw the object as a point or box, and ONLY draw arrows for forces acting ON the object — never forces exerted BY the object. Count your contact points: strings pull (T), surfaces push perpendicularly (N) and slide with friction (f). Add non-contact gravity (mg) downward. That is the whole list!",
+        coreFormulas: [
+            { label: "Equilibrium", formula: "ΣFx = 0  and  ΣFy = 0" },
+            { label: "Accelerated Frame", formula: "ΣF_real + F_pseudo = 0  (or ΣF_real = m·a in ground frame)" }
+        ],
+        kotaTricks: [
+            "⚡ Contact Rule: Count surfaces touching the body. If 2 surfaces touch, you have exactly 2 Normal forces and at most 2 friction forces.",
+            "⚡ Incline Coordinate Hack: Always tilt your axes! Make x-axis parallel to incline, y-axis perpendicular. mg breaks into mg·sinθ down incline and mg·cosθ perpendicular."
+        ],
+        commonTraps: [
+            "🚨 Drawing 'ma' as a force on the FBD! 'ma' is the RESULT of forces, not an actual force. Never draw an arrow called 'ma'.",
+            "🚨 Drawing the force exerted BY the object on surrounding surfaces."
+        ],
+        benchmarkQuestion: {
+            question: "A 4 kg block rests on a 30° smooth incline, held by a horizontal string. Find the tension in the string and normal force.",
+            approach: "1. FBD forces: mg = 40 N vertically down, Normal N perpendicular to incline (at 30° to vertical), Tension T horizontal.\n2. Along incline: T cos 30° = mg sin 30° ⇒ T = mg tan 30° = 40 · (1/√3) = 23.1 N.\n3. Perpendicular: N = mg cos 30° + T sin 30° = 40(√3/2) + 23.1(0.5) = 46.2 N.",
+            answer: "T = 23.1 N, N = 46.2 N"
+        }
+    },
+
+    "Friction — Static & Kinetic": {
+        quote: "Friction is smart: static friction does not have a fixed value — it is a self-adjusting guardian angel until it breaks!",
+        intuition: "Static friction is like an arm-wrestling opponent who only pushes back with exactly as much force as you push, up to a maximum limit (f_s_max = μ_s·N). If you push a heavy sofa with 5 N, friction pushes back with 5 N, NOT μ_s·N! Only when your push exceeds μ_s·N does it slip, and then kinetic friction (f_k = μ_k·N) takes over with a constant value.",
+        coreFormulas: [
+            { label: "Static Friction", formula: "0 ≤ f_s ≤ f_s_max  where  f_s_max = μ_s · N" },
+            { label: "Kinetic Friction", formula: "f_k = μ_k · N  (Opposes relative sliding between surfaces)" },
+            { label: "Angle of Repose", formula: "tan θ = μ_s (Max incline angle before slipping begins)" }
+        ],
+        kotaTricks: [
+            "⚡ The 2-Block Master Technique: When block A sits on block B and you pull one block, always find the MAXIMUM common acceleration first: a_max = f_s_max / m_top = μ_s · g. If the pulling force causes a < a_max, both blocks move together as one!",
+            "⚡ Direction of Friction: Think 'if there was zero friction, which way would this surface slip relative to the other?' Friction acts in the exact opposite direction of that imaginary slip."
+        ],
+        commonTraps: [
+            "🚨 Blindly substituting f = μ·N without checking if the applied force is actually enough to cause motion!",
+            "🚨 Assuming Normal force is always mg. On an incline N = mg cos θ; if a vertical push F acts, N = mg + F."
+        ],
+        benchmarkQuestion: {
+            question: "A 5 kg block on a rough horizontal floor (μ_s = 0.4, μ_k = 0.3) is pulled by a horizontal force of 15 N. What is the friction force acting on it? (g = 10 m/s²)",
+            approach: "1. Normal force N = mg = 50 N.\n2. Maximum static friction f_s_max = μ_s · N = 0.4 · 50 = 20 N.\n3. The applied force is 15 N, which is LESS than 20 N.\n4. Therefore, the block does not move! Static friction adjusts to exactly balance the push: f_s = 15 N.",
+            answer: "15 N (NOT 20 N and NOT 15 N to the right!)"
+        }
+    },
+
+    "Constraint Equations": {
+        quote: "Pulleys and strings cannot stretch or vanish. Their geometry dictates that every millimeter lost here is gained there.",
+        intuition: "Constraint relations are pure geometry disguised as physics. If you pull a movable pulley up by 1 cm, it takes 1 cm from the left string and 1 cm from the right string, meaning the free end must feed 2 cm of rope! Instead of getting tangled in string lengths, Kota faculties use the legendary Virtual Work Method: strings do zero net work!",
+        coreFormulas: [
+            { label: "Virtual Work Constraint", formula: "Σ (T · a) = 0  and  Σ (T · v) = 0  and  Σ (T · x) = 0" },
+            { label: "Wedge Constraint", formula: "v_perpendicular_to_contact_surface MUST be identical for both wedge and block" }
+        ],
+        kotaTricks: [
+            "⚡ The Tension-Dot-Acceleration Magic: Label tension in every string branch in terms of 'T'. Write Σ (T_i · a_i · cos θ_i) = 0. Instant acceleration relationship in 10 seconds without calculating string lengths!",
+            "⚡ Wedge Hack: Draw the common normal at the contact surface. The velocity component of both bodies along this normal MUST match: v1 · sin α = v2 · cos β."
+        ],
+        commonTraps: [
+            "🚨 Forgetting the sign of cos θ when applying Σ T · a = 0. If T and a point in the same direction, cos 0° = +1; if opposite, cos 180° = -1."
+        ],
+        benchmarkQuestion: {
+            question: "A block A of mass m is suspended from a movable pulley connected to fixed block B on a table. If block A descends with acceleration a_A, what is the acceleration a_B of block B?",
+            approach: "1. Tension on B is T horizontally. Tension supporting movable pulley A is 2T upward.\n2. Apply Σ (T · a) = 0:\n   T_B · a_B · (1) + (2T) · a_A · (-1) = 0\n   T · a_B - 2T · a_A = 0 ⇒ a_B = 2 · a_A.",
+            answer: "a_B = 2 · a_A"
+        }
+    },
+
+    "Pseudo Forces": {
+        quote: "Pseudo force is the price you pay for being lazy and observing physics from an accelerating reference frame!",
+        intuition: "When a bus driver slams the gas pedal, you feel pushed back into your seat. Does a ghost push you? No! The bus is accelerating forward under you, and your inertia wants to stay behind. If you insist on sitting inside the bus (an accelerating, non-inertial frame) and doing physics, you MUST add a fictitious 'pseudo force' F_pseudo = - m · a_frame on every mass, pointing opposite to the frame's acceleration.",
+        coreFormulas: [
+            { label: "Pseudo Force", formula: "F_pseudo = - m · a_frame (Magnitude = m · a_frame, direction strictly opposite to a_frame)" },
+            { label: "Effective Gravity", formula: "g_eff = g - a_frame  (vector subtraction)" }
+        ],
+        kotaTricks: [
+            "⚡ Elevator Pendulum Trick: T = 2π √(L / g_eff). Lift accelerating up with 'a' ⇒ g_eff = g + a (heavier). Accelerating down with 'a' ⇒ g_eff = g - a (lighter). Free fall ⇒ g_eff = 0 (infinite period!).",
+            "⚡ Wedge in Motion: To keep a block stationary on a smooth incline of angle θ, the wedge must accelerate with a = g · tan θ to the right."
+        ],
+        commonTraps: [
+            "🚨 Using the acceleration of the object itself instead of the acceleration of the FRAME for F_pseudo!",
+            "🚨 Adding pseudo force when you are already observing from the stationary ground frame (inertial frame)."
+        ],
+        benchmarkQuestion: {
+            question: "A simple pendulum of mass m is suspended inside a car accelerating horizontally with 'a'. Find the angle θ the string makes with vertical in equilibrium.",
+            approach: "1. Sit inside the car (non-inertial frame accelerating right with 'a').\n2. Forces on bob: mg downward, F_pseudo = m·a to the left, Tension T along string.\n3. Balance forces: T sin θ = m·a, T cos θ = m·g.\n4. Divide: tan θ = a / g ⇒ θ = arctan(a / g).",
+            answer: "θ = tan⁻¹(a / g)"
+        }
+    },
+
+    "Work Done by Constant & Variable Forces": {
+        quote: "Work is not about how tired you get; it is strictly about how much force actually helped displacement happen.",
+        intuition: "If you push a wall until you sweat for 3 hours, your muscles did work internally, but in Physics, work done ON the wall is strictly ZERO because the wall did not move! Work is the dot product: W = F · d · cos θ. Only the force component in the direction of motion counts. If force varies (like a spring), work is the area under the Force vs Position (F-x) curve.",
+        coreFormulas: [
+            { label: "Constant Force", formula: "W = F · d = |F| |d| cos θ" },
+            { label: "Variable Force (1D)", formula: "W = ∫[x1 to x2] F(x) dx  (= Area under F-x graph)" },
+            { label: "Variable Force (3D)", formula: "W = ∫ Fx dx + ∫ Fy dy + ∫ Fz dz" }
+        ],
+        kotaTricks: [
+            "⚡ Perpendicular Forces Do Zero Work: Centripetal force, magnetic Lorentz force (q v × B), and Normal force on a stationary surface always have θ = 90°, so W = 0 automatically!",
+            "⚡ Conservative Force Test: If F = -∇U, work along any closed loop is zero: ∮ F · dr = 0."
+        ],
+        commonTraps: [
+            "🚨 Confusing sign of work done BY the spring (W = -½ k x²) vs work done ON the spring to compress it (W = +½ k x²).",
+            "🚨 Forgetting that friction CAN do positive work (e.g. static friction on the top block in a two-block system causes it to accelerate forward)."
+        ],
+        benchmarkQuestion: {
+            question: "A force F = (3x² + 2x) N acts on a particle moving from x = 1 m to x = 3 m. Calculate the work done.",
+            approach: "1. Variable force in 1D ⇒ W = ∫[1 to 3] (3x² + 2x) dx.\n2. Anti-derivative = [x³ + x²] from 1 to 3.\n3. Evaluate at 3: 3³ + 3² = 27 + 9 = 36 J.\n4. Evaluate at 1: 1³ + 1² = 1 + 1 = 2 J.\n5. W = 36 - 2 = 34 J.",
+            answer: "34 Joules"
+        }
+    },
+
+    "Work-Energy Theorem": {
+        quote: "The single most powerful hammer in JEE Physics. When kinematics looks impossible, W-E theorem solves it in two lines.",
+        intuition: "Instead of tracking time, vectors, and accelerations at every microsecond, Work-Energy theorem looks at the universe like a bank account. Net work done by ALL forces (gravity, friction, tension, hands, springs, pseudo forces) equals the change in kinetic energy: W_all = ΔK = ½mv_f² - ½mv_i². No matter how curved the trajectory is!",
+        coreFormulas: [
+            { label: "Universal Form", formula: "W_conservative + W_non-conservative + W_external = ΔK" },
+            { label: "Alternative Form", formula: "W_non-conservative + W_external = ΔE_mechanical = ΔK + ΔU" }
+        ],
+        kotaTricks: [
+            "⚡ Loop-the-Loop Minimum Speed: At highest point v_top = √(g·R); at lowest point v_bottom = √(5g·R) for a string to avoid slackening.",
+            "⚡ Spring-Mass on Incline: Instead of integrating, write: W_gravity + W_spring + W_friction = 0 at the turning point (where v starts from 0 and momentarily becomes 0)."
+        ],
+        commonTraps: [
+            "🚨 Forgetting friction work: W_friction = - f_k · (actual path length s), NOT displacement! Friction dissipates energy continuously along every curve.",
+            "🚨 Counting potential energy twice! If you include W_gravity on the left side, DO NOT also include ΔU_gravity on the right side."
+        ],
+        benchmarkQuestion: {
+            question: "A 2 kg block slides down a curved frictionless track of height h = 5 m and hits a horizontal spring with k = 400 N/m. Find the maximum compression of the spring. (g = 10 m/s²)",
+            approach: "1. All forces are conservative (gravity + spring). W_all = ΔK.\n2. Initially at rest (K_i = 0), at max compression momentarily at rest (K_f = 0) ⇒ ΔK = 0.\n3. W_gravity + W_spring = 0 ⇒ mgh - ½ k x² = 0.\n4. ½ (400) x² = (2)(10)(5) = 100 ⇒ 200 x² = 100 ⇒ x² = 0.5 ⇒ x = 1/√2 = 0.707 m.",
+            answer: "x = 0.71 m"
+        }
+    },
+
+    "Conservation of Energy": {
+        quote: "Energy cannot be created or destroyed — it only changes clothes from Kinetic to Potential to Thermal.",
+        intuition: "Think of energy like 100 gold coins. If you drop a stone from a cliff, it starts with 100 coins of Gravitational PE and 0 coins of KE. Halfway down, it has 50 PE and 50 KE. Just before impact, all 100 coins have converted to KE. If there is friction or air drag, some coins leak into heat, but the grand total is ALWAYS conserved.",
+        coreFormulas: [
+            { label: "Mechanical Energy", formula: "E_mech = K + U = constant (valid when ONLY conservative forces do work)" },
+            { label: "Gravitational PE", formula: "U_g = m · g · h  (near Earth surface)" },
+            { label: "Spring Elastic PE", formula: "U_s = ½ k x²" }
+        ],
+        kotaTricks: [
+            "⚡ Reference Level Freedom: You can set U = 0 anywhere you like! Choose the lowest point in the problem as U = 0 so all your PE terms stay positive.",
+            "⚡ Vertical Circle Critical Speed for Rod vs String: For a rigid massless rod, speed at top can be 0 (v_top = 0 ⇒ v_bottom = √(4gR) = 2√(gR)), while for a string it cannot go slack (v_top = √(gR) ⇒ v_bottom = √(5gR))."
+        ],
+        commonTraps: [
+            "🚨 Using conservation of mechanical energy when friction or inelastic collision is present. (Mechanical energy is lost to heat!)."
+        ],
+        benchmarkQuestion: {
+            question: "A pendulum bob of mass m is released from horizontal position (θ = 90°). Find the tension in the string when it reaches the lowest point.",
+            approach: "1. Conservation of energy: mgl = ½ m v² ⇒ v² = 2gl.\n2. At lowest point, forces are Tension T upward and mg downward.\n3. Net radial force provides centripetal acceleration: T - mg = m v² / l.\n4. Substitute v² = 2gl: T - mg = m(2gl) / l = 2mg ⇒ T = 3mg.",
+            answer: "T = 3 mg (Exactly 3 times its weight!)"
+        }
+    },
+
+    "Power": {
+        quote: "Work tells you how much was done; Power tells you how fast and powerful the engine is.",
+        intuition: "Walking up 5 flights of stairs and sprinting up 5 flights of stairs requires the exact same work (mgh). But sprinting makes your heart pound because you delivered that work in 15 seconds instead of 5 minutes! Power is the rate of doing work: P = dW/dt = F · v.",
+        coreFormulas: [
+            { label: "Average Power", formula: "P_avg = ΔW / Δt" },
+            { label: "Instantaneous Power", formula: "P = F · v = F · v · cos θ" },
+            { label: "Constant Power Acceleration", formula: "If P = const ⇒ v ∝ t^(1/2)  and  x ∝ t^(3/2)" }
+        ],
+        kotaTricks: [
+            "⚡ Constant Power Master Scaling: For a vehicle accelerated from rest by constant power P: v(t) = √(2Pt/m) ∝ t^(1/2), and position x(t) = ⅓ √(8P/m) · t^(3/2) ∝ t^(1.5). NTA loves this exact proportionality question!",
+            "⚡ Pump Power: P = (dm/dt) · gh + ½ (dm/dt) · v² = ρ·A·v·(gh + ½v²)."
+        ],
+        commonTraps: [
+            "🚨 Assuming F is constant when Power is constant. As v increases, if P = F·v is constant, force F MUST decrease as 1/v!"
+        ],
+        benchmarkQuestion: {
+            question: "An engine pumps water continuously through a hose of cross-section A with speed v. What rate of work (power) does the engine impart to the water?",
+            approach: "1. Mass of water delivered per second: dm/dt = ρ · A · v.\n2. Kinetic energy imparted per second = ½ (dm/dt) v² = ½ (ρ A v) v² = ½ ρ A v³.\n3. Power = ½ ρ A v³.",
+            answer: "P = ½ ρ A v³ (Note: proportional to v³!)"
+        }
+    },
+
+    "Linear Momentum & Impulse": {
+        quote: "If no external bully pushes the system, the total momentum remains locked in stone forever.",
+        intuition: "Momentum p = m·v is the 'un-stoppability' of an object. A train moving at 5 km/h has gigantic momentum because of mass; a bullet moving at 800 m/s has gigantic momentum because of velocity. Impulse is the delivery of momentum: J = F · Δt. To catch a cricket ball without pain, you draw your hands back to increase Δt, reducing the impact force F!",
+        coreFormulas: [
+            { label: "Linear Momentum", formula: "p = m · v" },
+            { label: "Conservation Principle", formula: "If Σ F_external = 0 ⇒ p_total = constant" },
+            { label: "Impulse", formula: "J = ∫ F dt = Δp = p_final - p_initial" }
+        ],
+        kotaTricks: [
+            "⚡ Gun Recoil: m_gun · v_gun = - m_bullet · v_bullet ⇒ v_gun = - (m_bullet / m_gun) · v_bullet.",
+            "⚡ Exploding Shells: If a projectile explodes at the highest point, internal explosion forces do not alter COM trajectory: m · v_COM = Σ m_i · v_i."
+        ],
+        commonTraps: [
+            "🚨 Momentum is a VECTOR. You MUST designate a positive direction. If an 80 g ball hits a wall at +10 m/s and rebounds at -10 m/s, Δp = m(-10 - (+10)) = -20m, NOT zero!"
+        ],
+        benchmarkQuestion: {
+            question: "A 0.15 kg ball moving horizontally at 20 m/s is hit by a bat and returns in the opposite direction at 20 m/s. The contact lasts 0.01 s. Find the average force exerted by the bat.",
+            approach: "1. Take initial direction as positive (+).\n2. p_initial = 0.15 · (+20) = +3.0 kg·m/s.\n3. p_final = 0.15 · (-20) = -3.0 kg·m/s.\n4. Impulse J = Δp = p_f - p_i = -3.0 - 3.0 = -6.0 N·s.\n5. F_avg = J / Δt = -6.0 / 0.01 = -600 N.",
+            answer: "600 N (opposite to initial velocity)"
+        }
+    },
+
+    "Collisions — Elastic & Inelastic": {
+        quote: "In every collision momentum is conserved. What separates elastic from inelastic is whether kinetic energy survives or turns into heat.",
+        intuition: "When billiard balls collide, they spring back with almost zero deformation: Kinetic Energy is saved (Elastic, e = 1). When two lumps of clay smash together and stick, deformation is maximum and kinetic energy is wiped out into heat (Completely Inelastic, e = 0). The coefficient of restitution e measures the 'bounciness': e = (separation velocity) / (approach velocity).",
+        coreFormulas: [
+            { label: "Restitution Coeff (e)", formula: "e = (v2 - v1) / (u1 - u2)  [0 ≤ e ≤ 1; e=1 Elastic, e=0 Perfectly Inelastic]" },
+            { label: "Final Velocity Formula", formula: "v1 = [(m1 - e·m2)u1 + (1+e)m2·u2] / (m1 + m2)" },
+            { label: "Loss in KE", formula: "ΔK_loss = ½ · [m1·m2 / (m1 + m2)] · (1 - e²) · (u1 - u2)²" }
+        ],
+        kotaTricks: [
+            "⚡ Equal Masses Elastic Collision: When m1 = m2 and e = 1, velocities COMPLETELY SWAP! u1 becomes v2, and u2 becomes v1. Classic 5-second JEE answer.",
+            "⚡ Massive Target Trick: If a light ball of mass m hits a massive stationary wall/truck (M >> m) elastically, it simply bounces back with speed v = -u."
+        ],
+        commonTraps: [
+            "🚨 Believing kinetic energy is conserved in all collisions. ONLY momentum is universally conserved; KE is only conserved when e = 1."
+        ],
+        benchmarkQuestion: {
+            question: "A ball of mass 2 kg moving at 6 m/s collides head-on with a stationary 4 kg ball. If the collision is perfectly elastic (e = 1), find the velocity of each ball after collision.",
+            approach: "1. v1 = [(m1 - m2)u1 + 2m2·u2] / (m1 + m2) = [(2 - 4)(6) + 0] / (2 + 4) = -12 / 6 = -2 m/s (rebounds).\n2. v2 = [(m2 - m1)u2 + 2m1·u1] / (m1 + m2) = [0 + 2(2)(6)] / 6 = 24 / 6 = +4 m/s.",
+            answer: "v1 = -2 m/s, v2 = +4 m/s"
+        }
+    },
+
+    "Centre of Mass": {
+        quote: "The Centre of Mass is the balance point of the entire system — if gravity holds the body, COM is where it rests in equilibrium.",
+        intuition: "A spinning wrench flying through the air looks like a chaotic blur. But if you put a glowing neon dot on its Centre of Mass, that dot moves in a pure, peaceful, gorgeous parabola! The COM represents the weighted average position of mass: X_com = Σ(m_i x_i) / M. If no external force acts on a boat when a person walks across it, the COM of (boat + person) stays dead frozen in space!",
+        coreFormulas: [
+            { label: "Discrete COM", formula: "R_com = (m1 r1 + m2 r2 + ... + mn rn) / (m1 + m2 + ... + mn)" },
+            { label: "Continuous COM", formula: "R_com = (1/M) ∫ r dm" },
+            { label: "Cavity Theorem", formula: "X_rem = (M_total · X_total - M_cavity · X_cavity) / (M_total - M_cavity)" }
+        ],
+        kotaTricks: [
+            "⚡ Man on Boat / Plank Trick: A person of mass m walks distance L on a free plank of mass M. Displacement of plank = - (m · L) / (m + M). Instant answer without integration!",
+            "⚡ Standard COMs: Semicircular ring = 2R/π; Semicircular disc = 4R/(3π); Hemispherical shell = R/2; Solid hemisphere = 3R/8."
+        ],
+        commonTraps: [
+            "🚨 Forgetting that COM can lie completely OUTSIDE the physical material of the object (e.g. donut, ring, hollow sphere)."
+        ],
+        benchmarkQuestion: {
+            question: "A circular disc of radius R has a circular hole of radius R/2 cut out, with the rim of the hole touching the rim of the disc. Where is the COM of the remaining part relative to original center?",
+            approach: "1. Area of original disc A1 = π R² (mass M1 ∝ R²).\n2. Area of cut cavity A2 = π (R/2)² = π R² / 4 (mass M2 = M1 / 4).\n3. Center of cavity is at x = R/2.\n4. X_com = (M1 · 0 - M2 · (R/2)) / (M1 - M2) = (- (M1/4)(R/2)) / (3M1/4) = - R / 6.",
+            answer: "R/6 away from the hole (x = -R/6)"
+        }
+    },
+
+    "Moment of Inertia": {
+        quote: "Moment of Inertia is rotational mass. The further mass is spread from the axis, the harder it is to spin!",
+        intuition: "Why is a tightrope walker holding a long pole? Because spreading mass far away dramatically increases Moment of Inertia (I = m·r²). That massive I fiercely resists any sudden tipping rotations! For linear motion, mass m resists acceleration. For rotation, I resists angular acceleration (τ = I·α).",
+        coreFormulas: [
+            { label: "Discrete", formula: "I = Σ m_i · r_i²" },
+            { label: "Continuous", formula: "I = ∫ r² dm" },
+            { label: "Radius of Gyration", formula: "k = √(I / M)  ⇒  I = M · k²" }
+        ],
+        kotaTricks: [
+            "⚡ Standard Geometries (Through COM): Ring = MR²; Disc = ½ MR²; Solid Cylinder = ½ MR²; Hollow Cylinder = MR²; Solid Sphere = 2/5 MR²; Hollow Sphere = 2/3 MR²; Rod (center) = 1/12 ML²; Rod (end) = ⅓ ML².",
+            "⚡ Resistance to Rolling Ranking: 2/5 (Solid Sphere) < ½ (Disc) < 2/3 (Hollow Sphere) < 1 (Ring). Solid sphere always wins the race down an incline!"
+        ],
+        commonTraps: [
+            "🚨 The distance 'r' is strictly the PERPENDICULAR distance from the rotation axis, NOT the distance from the origin!"
+        ],
+        benchmarkQuestion: {
+            question: "Find the ratio of moment of inertia of a solid sphere of mass M and radius R about its diameter to that of a thin spherical shell of same mass and radius.",
+            approach: "1. Solid sphere I_solid = (2/5) M R².\n2. Spherical shell I_shell = (2/3) M R².\n3. Ratio = (2/5) / (2/3) = 3/5 = 0.6.",
+            answer: "3 : 5"
+        }
+    },
+
+    "Parallel & Perpendicular Axis Theorems": {
+        quote: "Never integrate twice: if you know I through the COM, parallel axis theorem shifts you to any parallel axis in one step.",
+        intuition: "Want the moment of inertia about a door's hinge instead of its center? Parallel Axis Theorem says: I_axis = I_com + M·d², where d is the shift distance. It tells you that I is ALWAYS at its absolute minimum through the COM! Perpendicular Axis Theorem is a planar special: for flat 2D lamina, I_z = I_x + I_y.",
+        coreFormulas: [
+            { label: "Parallel Axis Theorem", formula: "I = I_com + M · d²  (Valid for ANY 3D body; axis MUST be parallel to COM axis)" },
+            { label: "Perpendicular Axis Theorem", formula: "I_z = I_x + I_y  (STRICTLY for flat 2D planar lamina in xy-plane)" }
+        ],
+        kotaTricks: [
+            "⚡ Disc Edge Tangent: I_tangent_parallel = I_com + M R² = ½ MR² + MR² = 3/2 MR².\nPerpendicular tangent: I_tangent_perp = (5/4) MR².",
+            "⚡ Rod at End: I_end = I_com + M(L/2)² = 1/12 ML² + 1/4 ML² = ⅓ ML²."
+        ],
+        commonTraps: [
+            "🚨 Using Parallel Axis Theorem between two arbitrary axes! One of the two axes MUST pass through the Centre of Mass. You cannot shift directly from edge to edge without passing through COM.",
+            "🚨 Applying Perpendicular Axis Theorem to a solid sphere or cylinder! It ONLY works for flat 2D planar plates."
+        ],
+        benchmarkQuestion: {
+            question: "Find the moment of inertia of a uniform circular disc of mass M and radius R about a tangent in the plane of the disc.",
+            approach: "1. For a disc in xy plane: by perpendicular axis theorem, I_z = I_x + I_y = 2·I_diameter ⇒ I_diameter = ½ I_z = ¼ M R².\n2. A tangent in the plane is parallel to the diameter at distance d = R.\n3. Apply Parallel Axis Theorem: I_tangent = I_diameter + M R² = ¼ M R² + M R² = 5/4 M R².",
+            answer: "5/4 M R²"
+        }
+    },
+
+    "Torque & Angular Momentum": {
+        quote: "Torque is the rotational push; Angular momentum is rotational momentum. In the absence of external torque, spins are forever.",
+        intuition: "Why is a door handle placed at the outer edge rather than near the hinge? Because Torque = r × F = r · F · sin θ! The larger the lever arm r, the more rotation torque you generate with tiny effort. Angular momentum L = r × p = I · ω. When a spinning ice skater pulls her arms inward, her Moment of Inertia I drops, so her spin speed ω skyrockets to conserve L!",
+        coreFormulas: [
+            { label: "Torque", formula: "τ = r × F = r · F_perp = I · α" },
+            { label: "Angular Momentum", formula: "L = r × p = I · ω  (for fixed axis rotation)" },
+            { label: "Conservation of L", formula: "If Σ τ_ext = 0 ⇒ I1 · ω1 = I2 · ω2" }
+        ],
+        kotaTricks: [
+            "⚡ Lever Arm Technique: τ = F · r_perp, where r_perp is the perpendicular distance from the pivot to the line of action of force. Avoids cross products!",
+            "⚡ Combined Translation + Rotation L: L_total = L_com + r_com × M v_com."
+        ],
+        commonTraps: [
+            "🚨 Calculating torque without specifying the PIVOT point. Torque only has meaning relative to a specified origin/point!",
+            "🚨 Forgetting direction: use the Right-Hand Rule (curl fingers from r to F; thumb points in direction of torque)."
+        ],
+        benchmarkQuestion: {
+            question: "A uniform disc of mass M and radius R rotating at angular speed ω0 is placed gently on a horizontal table. Friction acts until pure rolling begins. Find the final angular velocity.",
+            approach: "1. Take torque about the point of contact on the floor. Friction acts through this point, so τ_contact = 0!\n2. Angular momentum about contact point is conserved: L_initial = I_com · ω0 = (½ M R²) ω0.\n3. Pure rolling state: v = R ω, and L_final = I_com · ω + M v R = ½ M R² ω + M R² ω = 3/2 M R² ω.\n4. Equate: ½ M R² ω0 = 3/2 M R² ω ⇒ ω = ω0 / 3.",
+            answer: "ω = ω0 / 3 (Pure rolling attained at one-third original speed!)"
+        }
+    },
+
+    "Rolling Motion": {
+        quote: "Rolling is translation plus rotation dancing in perfect harmony. At the contact point, the wheel kisses the road at zero relative speed!",
+        intuition: "In pure rolling without slipping, the bottom point of the tire is momentarily AT REST relative to the road (v_contact = v_com - R·ω = 0 ⇒ v_com = R·ω). Because the contact point isn't sliding, static friction does zero work! All kinetic energy splits into translational KE (½ M v²) and rotational KE (½ I ω²).",
+        coreFormulas: [
+            { label: "Pure Rolling Condition", formula: "v_com = R · ω  and  a_com = R · α" },
+            { label: "Total Kinetic Energy", formula: "K_total = ½ M v² + ½ I ω² = ½ M v² (1 + k²/R²)" },
+            { label: "Incline Acceleration", formula: "a = (g · sin θ) / (1 + k²/R²)" }
+        ],
+        kotaTricks: [
+            "⚡ The Rolling Fraction Table (k²/R²):\n• Solid Sphere: k²/R² = 2/5 = 0.40 ⇒ a = 5/7 g sin θ\n• Disc / Solid Cylinder: k²/R² = 1/2 = 0.50 ⇒ a = 2/3 g sin θ\n• Hollow Sphere: k²/R² = 2/3 = 0.67 ⇒ a = 3/5 g sin θ\n• Ring / Hollow Cylinder: k²/R² = 1.00 ⇒ a = 1/2 g sin θ",
+            "⚡ Velocity at bottom of incline h: v = √[ 2gh / (1 + k²/R²) ]. The smallest k²/R² reaches the bottom fastest!"
+        ],
+        commonTraps: [
+            "🚨 Thinking friction always slows down rolling! On an incline, friction acts UP the incline to provide the clockwise torque needed to roll.",
+            "🚨 Believing kinetic friction acts during pure rolling. It is STATIC friction (f_s ≤ μ_s N), so mechanical energy is conserved!"
+        ],
+        benchmarkQuestion: {
+            question: "A solid sphere and a disc of equal mass and radius roll down an inclined plane from the same height without slipping. Which reaches the bottom first?",
+            approach: "1. a = g sin θ / (1 + k²/R²).\n2. For solid sphere: k²/R² = 2/5 = 0.40 ⇒ a_sphere = (5/7) g sin θ = 0.714 g sin θ.\n3. For disc: k²/R² = 1/2 = 0.50 ⇒ a_disc = (2/3) g sin θ = 0.667 g sin θ.\n4. a_sphere > a_disc ⇒ Sphere accelerates faster and reaches first.",
+            answer: "Solid Sphere reaches first"
+        }
+    },
+
+    "Gravitation & Kepler's Laws": {
+        quote: "Gravity is the silent glue of the cosmos. Everything attracts everything with a whisper proportional to mass.",
+        intuition: "Newton realized the same force pulling an apple to the ground keeps the Moon in orbit. Gravity is an inverse-square force: double the distance, and the pull drops to one-fourth. Kepler discovered that planets sweep equal areas in equal times (which is just Conservation of Angular Momentum in space!) and T² ∝ R³.",
+        coreFormulas: [
+            { label: "Universal Gravitation", formula: "F = G · (m1 · m2) / r²" },
+            { label: "Gravitational Field & Potential", formula: "g = GM/r²  and  V = - GM/r" },
+            { label: "Escape Velocity", formula: "v_esc = √(2GM / R) = √(2gR) ≈ 11.2 km/s (for Earth)" },
+            { label: "Orbital Velocity", formula: "v_orb = √(GM / r) = v_esc / √2" },
+            { label: "Kepler's 3rd Law", formula: "T² = (4π² / GM) · a³  ⇒  T² ∝ a³" }
+        ],
+        kotaTricks: [
+            "⚡ Altitude vs Depth Variation:\n• At height h << R: g_h ≈ g(1 - 2h/R)\n• At depth d: g_d = g(1 - d/R) [Exact for all depths!]\n• At what height is g same as depth d? 2h = d (for h << R).",
+            "⚡ Satellite Energy: Kinetic K = GMm/(2r), Potential U = -GMm/r, Total E = -GMm/(2r). Ratio K : U : E = 1 : -2 : -1."
+        ],
+        commonTraps: [
+            "🚨 Using g_h = g(1 - 2h/R) when h is large! If h = R, you MUST use the exact formula g_h = g / (1 + h/R)² = g / 4.",
+            "🚨 Escape velocity is INDEPENDENT of the launch angle and independent of the mass of the projectile!"
+        ],
+        benchmarkQuestion: {
+            question: "At what height above the Earth's surface does the acceleration due to gravity become 1/9th of its value at the surface? (Radius of Earth = R)",
+            approach: "1. Exact formula: g(h) = g / (1 + h/R)².\n2. Given g(h) = g / 9 ⇒ (1 + h/R)² = 9.\n3. Take square root: 1 + h/R = 3 ⇒ h/R = 2 ⇒ h = 2R.",
+            answer: "h = 2 R (twice the Earth's radius)"
+        }
+    },
+
+    "Projectile Motion": {
+        quote: "Horizontal and vertical motions are independent twins who live in the same house but never talk to each other.",
+        intuition: "Once you launch a projectile, gravity ONLY pulls vertically (a_y = -g). Nobody is pushing or pulling horizontally (a_x = 0). So the horizontal velocity v_x = u·cos θ stays locked and constant from launch to landing! All you have to do is run horizontal kinematics and vertical kinematics side-by-side using time t as the shared bridge.",
+        coreFormulas: [
+            { label: "Time of Flight", formula: "T = 2 u sin θ / g" },
+            { label: "Maximum Height", formula: "H = u² sin² θ / (2g)" },
+            { label: "Horizontal Range", formula: "R = u² sin(2θ) / g" },
+            { label: "Trajectory Equation", formula: "y = x tan θ - (g x² / (2 u² cos² θ)) = x tan θ (1 - x / R)" }
+        ],
+        kotaTricks: [
+            "⚡ Complementary Angles Rule: Range is IDENTICAL for angles θ and (90° - θ). For example, 30° and 60° have the exact same landing distance!",
+            "⚡ The 4H/R Formula: tan θ = 4H / R. If H = R, then tan θ = 4 ⇒ θ = 76°.",
+            "⚡ Factored Trajectory Equation: y = x tan θ (1 - x/R). In JEE, this form solves 80% of trajectory problems in 1 step."
+        ],
+        commonTraps: [
+            "🚨 At maximum height, velocity is NOT zero! Vertical velocity is zero (v_y = 0), but horizontal velocity is still alive and kicking: v = u cos θ."
+        ],
+        benchmarkQuestion: {
+            question: "A projectile has a range of 80 m and maximum height of 20 m. Find the projection angle and initial velocity. (g = 10 m/s²)",
+            approach: "1. Use Kota trick: tan θ = 4H / R = 4(20) / 80 = 80 / 80 = 1.\n2. tan θ = 1 ⇒ θ = 45°.\n3. At 45°, R = u² / g = 80 ⇒ u² = 800 ⇒ u = √800 = 20√2 m/s.",
+            answer: "θ = 45°, u = 20√2 m/s ≈ 28.3 m/s"
+        }
+    },
+
+    "Circular Motion": {
+        quote: "Turning requires a force pointing to the center — without centripetal force, straight lines are nature's only option.",
+        intuition: "Even if a car goes around a circle at a steady 60 km/h, it IS accelerating! Why? Because velocity is a vector, and its direction is turning every millisecond. To turn, there must be a force pulling inward toward the center: a_c = v² / R. If you cut the string, the object doesn't fly outward — it flies tangent to the circle!",
+        coreFormulas: [
+            { label: "Centripetal Acceleration", formula: "a_c = v² / R = ω² · R" },
+            { label: "Tangential Acceleration", formula: "a_t = dv/dt = α · R  (changes speed)" },
+            { label: "Total Acceleration", formula: "a_net = √(a_c² + a_t²)" },
+            { label: "Banked Road (Optimal)", formula: "tan θ = v² / (R · g)" }
+        ],
+        kotaTricks: [
+            "⚡ Banked Road Speed Range: v_max = √[ R·g (tan θ + μ) / (1 - μ tan θ) ]; v_min = √[ R·g (tan θ - μ) / (1 + μ tan θ) ].",
+            "⚡ Conical Pendulum: Time period T = 2π √(L cos θ / g) = 2π √(h / g), where h is the vertical distance from pivot to circle plane."
+        ],
+        commonTraps: [
+            "🚨 Centripetal force is NOT a new magical force like gravity or tension. It is just the label for WHATEVER real force points to the center (e.g. friction for cars, gravity for planets, tension for strings)."
+        ],
+        benchmarkQuestion: {
+            question: "A car rounds an unbanked circular curve of radius 50 m on a road with friction coefficient μ = 0.5. What is the maximum safe speed? (g = 10 m/s²)",
+            approach: "1. Friction provides centripetal acceleration: f_max = μ · mg = m v² / R.\n2. Mass cancels: v_max = √(μ · R · g).\n3. v_max = √(0.5 · 50 · 10) = √250 = 5√10 ≈ 15.8 m/s.",
+            answer: "15.8 m/s (approx 57 km/h)"
+        }
+    }
+};
+
+
