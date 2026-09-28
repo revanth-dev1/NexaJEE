@@ -56,6 +56,13 @@ function saveState() {
             flashcardsMastery: state.flashcardsMastery,
             focusTimerSessions: state.focusTimerSessions
         }));
+
+        if (state.currentSection === 'tracker') {
+            renderTrackerSection();
+        }
+        if (typeof debouncedGitHubSync === 'function') {
+            debouncedGitHubSync();
+        }
     } catch (e) { console.log('State save error:', e); }
 }
 
@@ -77,6 +84,7 @@ function navigateTo(section) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
     // Lazy render
+    if (section === 'tracker') renderTrackerSection();
     if (section === 'chapters' && !document.querySelector('.chapter-card')) renderChapters('all');
     if (section === 'formulas' && !document.querySelector('.formula-chapter')) renderFormulas('all');
     if (section === 'flashcards') initFlashcards();
@@ -1977,6 +1985,492 @@ function updateMistakeStats() {
     }
 }
 
+// ═══════════════════════════════════════════════════
+// GITHUB CLOUD SYNC & STUDENT PROGRESS TRACKER
+// ═══════════════════════════════════════════════════
+
+let gitHubSyncTimeout = null;
+const GITHUB_REPO_OWNER = 'revanth-dev1';
+const GITHUB_REPO_NAME = 'NexaJEE';
+const GITHUB_FILE_PATH = 'student_progress.json';
+
+function getGitHubToken() {
+    return localStorage.getItem('nexa_github_token') || '';
+}
+
+function getComprehensiveProgressReport() {
+    let physicsTotal = 0, physicsDone = 0, physicsDoneList = [];
+    let chemTotal = 0, chemDone = 0, chemDoneList = [];
+    let mathsTotal = 0, mathsDone = 0, mathsDoneList = [];
+
+    if (typeof chaptersData !== 'undefined') {
+        (chaptersData.physics || []).forEach((ch, i) => {
+            physicsTotal++;
+            const id = `physics-${i}`;
+            if (state.completedChapters.has(id)) {
+                physicsDone++;
+                physicsDoneList.push(ch.name);
+            }
+        });
+        (chaptersData.chemistry || []).forEach((ch, i) => {
+            chemTotal++;
+            const id = `chemistry-${i}`;
+            if (state.completedChapters.has(id)) {
+                chemDone++;
+                chemDoneList.push(ch.name);
+            }
+        });
+        (chaptersData.maths || []).forEach((ch, i) => {
+            mathsTotal++;
+            const id = `maths-${i}`;
+            if (state.completedChapters.has(id)) {
+                mathsDone++;
+                mathsDoneList.push(ch.name);
+            }
+        });
+    }
+
+    const totalChapters = physicsTotal + chemTotal + mathsTotal;
+    const completedChapters = physicsDone + chemDone + mathsDone;
+    const overallPct = totalChapters === 0 ? 0 : Math.round((completedChapters / totalChapters) * 100);
+
+    // Mock test stats
+    const tests = state.testHistory || [];
+    const testsCount = tests.length;
+    let avgScore = 0;
+    let bestScore = 0;
+    if (testsCount > 0) {
+        const sum = tests.reduce((acc, t) => acc + (t.percentage || 0), 0);
+        avgScore = Math.round(sum / testsCount);
+        bestScore = Math.max(...tests.map(t => t.percentage || 0));
+    }
+
+    // Flashcard stats
+    let fcMastered = 0, fcReview = 0, fcHard = 0;
+    const totalFc = typeof flashcardsData !== 'undefined' ? flashcardsData.length : 18;
+    Object.values(state.flashcardsMastery || {}).forEach(status => {
+        if (status === 'mastered') fcMastered++;
+        else if (status === 'medium') fcReview++;
+        else if (status === 'hard') fcHard++;
+    });
+
+    // Mistake stats
+    const mistakes = state.userMistakes || [];
+    const mistakesResolved = mistakes.filter(m => m.status === 'mastered').length;
+    const resolutionRate = mistakes.length === 0 ? '0%' : Math.round((mistakesResolved / mistakes.length) * 100) + '%';
+
+    const counts = {};
+    mistakes.forEach(m => { counts[m.errorType] = (counts[m.errorType] || 0) + 1; });
+    let topVuln = 'None';
+    let maxC = 0;
+    for (const [k, v] of Object.entries(counts)) {
+        if (v > maxC) { maxC = v; topVuln = k; }
+    }
+
+    const now = new Date();
+    const dateFormatted = now.toLocaleDateString('en-IN', {
+        day: 'numeric', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+
+    return {
+        student: "Nishu Kumari",
+        target: "JEE Main 2027",
+        lastUpdated: now.toISOString(),
+        lastUpdatedFormatted: dateFormatted,
+        overallProgress: {
+            totalChapters: totalChapters,
+            completedChapters: completedChapters,
+            percentage: overallPct,
+            physics: {
+                total: physicsTotal,
+                completed: physicsDone,
+                percentage: physicsTotal === 0 ? 0 : Math.round((physicsDone / physicsTotal) * 100),
+                completedList: physicsDoneList
+            },
+            chemistry: {
+                total: chemTotal,
+                completed: chemDone,
+                percentage: chemTotal === 0 ? 0 : Math.round((chemDone / chemTotal) * 100),
+                completedList: chemDoneList
+            },
+            mathematics: {
+                total: mathsTotal,
+                completed: mathsDone,
+                percentage: mathsTotal === 0 ? 0 : Math.round((mathsDone / mathsTotal) * 100),
+                completedList: mathsDoneList
+            }
+        },
+        studyEffort: {
+            xp: state.xp,
+            streakDays: state.streak,
+            focusSessions: state.focusTimerSessions || 0,
+            focusMinutes: (state.focusTimerSessions || 0) * 50,
+            doubtsAsked: state.doubtsAsked,
+            formulasViewed: state.formulasViewed
+        },
+        mockTests: {
+            totalAttempted: testsCount,
+            averageScore: avgScore,
+            bestScore: bestScore,
+            history: tests.slice(0, 10)
+        },
+        flashcards: {
+            total: totalFc,
+            mastered: fcMastered,
+            reviewing: fcReview,
+            hard: fcHard,
+            masteryPercentage: Math.round((fcMastered / totalFc) * 100)
+        },
+        mistakeDiary: {
+            totalLogged: mistakes.length,
+            masteredImmune: mistakesResolved,
+            resolutionRate: resolutionRate,
+            topVulnerability: topVuln,
+            recentEntries: mistakes.slice(0, 10)
+        },
+        rawState: {
+            completedChapters: [...state.completedChapters],
+            testHistory: state.testHistory,
+            badgesEarned: [...state.badgesEarned],
+            xp: state.xp,
+            streak: state.streak,
+            lastVisit: state.lastVisit,
+            doubtsAsked: state.doubtsAsked,
+            formulasViewed: state.formulasViewed,
+            userMistakes: state.userMistakes,
+            flashcardsMastery: state.flashcardsMastery,
+            focusTimerSessions: state.focusTimerSessions
+        }
+    };
+}
+
+function debouncedGitHubSync() {
+    clearTimeout(gitHubSyncTimeout);
+    gitHubSyncTimeout = setTimeout(() => {
+        syncProgressToGitHub(true);
+    }, 4000);
+}
+
+async function syncProgressToGitHub(isSilent = false) {
+    const token = getGitHubToken();
+    const dot = document.getElementById('syncStatusDot');
+    const text = document.getElementById('syncStatusText');
+    const pill = document.getElementById('cloudSyncPill');
+    const bannerStatus = document.getElementById('trackerSyncStatusText');
+    const bannerTime = document.getElementById('trackerLastSyncTime');
+
+    if (!token) {
+        if (dot) dot.textContent = '🟢';
+        if (text) text.textContent = 'Local Active';
+        if (pill) pill.classList.remove('syncing');
+        if (bannerStatus) bannerStatus.textContent = 'Saved Locally in Browser Storage';
+        if (bannerTime) bannerTime.textContent = 'Local persistence active · Click Settings to connect GitHub';
+        if (!isSilent) {
+            openSyncModal();
+            const feedback = document.getElementById('syncFeedback');
+            if (feedback) {
+                feedback.style.display = 'block';
+                feedback.style.background = 'rgba(246, 173, 85, 0.15)';
+                feedback.style.color = 'var(--accent-amber)';
+                feedback.innerHTML = 'ℹ️ Progress is saved safely on your device! To enable automatic commits directly into GitHub <code>student_progress.json</code>, enter your GitHub Personal Access Token below and click Save & Sync.';
+            }
+        }
+        return;
+    }
+
+    if (dot) dot.textContent = '🟡';
+    if (text) text.textContent = 'Syncing...';
+    if (pill) pill.classList.add('syncing');
+
+    try {
+        const report = getComprehensiveProgressReport();
+        const contentStr = JSON.stringify(report, null, 2);
+        
+        // Base64 encode for UTF-8
+        const utf8Bytes = new TextEncoder().encode(contentStr);
+        let binaryStr = '';
+        for (let i = 0; i < utf8Bytes.length; i++) {
+            binaryStr += String.fromCharCode(utf8Bytes[i]);
+        }
+        const b64Content = btoa(binaryStr);
+
+        // Get current sha
+        const getUrl = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/contents/${GITHUB_FILE_PATH}`;
+        const getRes = await fetch(getUrl, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+
+        let sha = null;
+        if (getRes.ok) {
+            const data = await getRes.json();
+            sha = data.sha;
+        }
+
+        // Put updated content
+        const putPayload = {
+            message: `Update Nishu's progress: ${report.overallProgress.percentage}% syllabus completed [Auto-Sync]`,
+            content: b64Content,
+            branch: 'main'
+        };
+        if (sha) {
+            putPayload.sha = sha;
+        }
+
+        const putRes = await fetch(getUrl, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(putPayload)
+        });
+
+        if (putRes.ok) {
+            const timeStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+            localStorage.setItem('nexa_last_sync', new Date().toISOString());
+
+            if (dot) dot.textContent = '🟢';
+            if (text) text.textContent = 'Synced';
+            if (pill) pill.classList.remove('syncing');
+            if (bannerStatus) bannerStatus.textContent = 'Auto-Sync Enabled · Connected to revanth-dev1/NexaJEE';
+            if (bannerTime) bannerTime.textContent = `Last Synced: Today at ${timeStr} IST`;
+
+            if (!isSilent) {
+                alert(`✅ Progress Synced to GitHub!\n\nAll of Nishu's course progress (${report.overallProgress.completedChapters} chapters, ${report.studyEffort.focusMinutes} focus mins, ${report.mockTests.totalAttempted} mock tests) has been securely committed to student_progress.json on GitHub.`);
+            }
+        } else {
+            const errJson = await putRes.json().catch(() => ({}));
+            throw new Error(errJson.message || 'GitHub API returned ' + putRes.status);
+        }
+    } catch (err) {
+        console.warn('GitHub Sync Notice:', err);
+        if (dot) dot.textContent = '⚪';
+        if (text) text.textContent = 'Local';
+        if (pill) pill.classList.remove('syncing');
+        if (bannerStatus) bannerStatus.textContent = 'Saved Locally in Browser Storage';
+        if (bannerTime) bannerTime.textContent = 'Offline cache active';
+
+        if (!isSilent) {
+            alert('Cloud Sync notice: Progress is saved safely in local storage. To enable direct GitHub auto-commit, check your Personal Access Token in Sync Settings.');
+        }
+    }
+}
+
+async function restoreProgressFromCloud() {
+    if (!confirm("This will restore Nishu's progress from student_progress.json on GitHub. Any new unsynced local data will be replaced. Continue?")) return;
+
+    try {
+        const url = `https://raw.githubusercontent.com/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/main/${GITHUB_FILE_PATH}?t=${Date.now()}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Could not fetch remote file: " + res.status);
+        
+        const data = await res.json();
+        if (data.rawState) {
+            state.completedChapters = new Set(data.rawState.completedChapters || []);
+            state.testHistory = data.rawState.testHistory || [];
+            state.badgesEarned = new Set(data.rawState.badgesEarned || []);
+            state.xp = data.rawState.xp || 0;
+            state.streak = data.rawState.streak || 0;
+            state.doubtsAsked = data.rawState.doubtsAsked || 0;
+            state.formulasViewed = data.rawState.formulasViewed || 0;
+            state.userMistakes = data.rawState.userMistakes || [];
+            state.flashcardsMastery = data.rawState.flashcardsMastery || {};
+            state.focusTimerSessions = data.rawState.focusTimerSessions || 0;
+            
+            saveState();
+            updateProgress();
+            renderBadges();
+            renderChapters('all');
+            renderTrackerSection();
+
+            alert(`✅ Progress Restored Successfully!\n\nLoaded: ${state.completedChapters.size} completed chapters, ${state.xp} XP, ${state.testHistory.length} mock tests from GitHub.`);
+            closeSyncModal();
+        } else {
+            alert("No saved learning state found in remote file.");
+        }
+    } catch (err) {
+        alert("Restore failed: " + err.message);
+    }
+}
+
+function renderTrackerSection() {
+    const report = getComprehensiveProgressReport();
+
+    // Top 4 stats
+    const sylPctEl = document.getElementById('trkSyllabusPct');
+    const chDoneEl = document.getElementById('trkChaptersDone');
+    const studyMinEl = document.getElementById('trkStudyMinutes');
+    const sprintEl = document.getElementById('trkSprintCount');
+    const mockAccEl = document.getElementById('trkMockAccuracy');
+    const testsEl = document.getElementById('trkTestsTaken');
+    const fcMastEl = document.getElementById('trkFlashcardsMastered');
+    const fcPctEl = document.getElementById('trkFlashcardsPct');
+
+    if (sylPctEl) sylPctEl.textContent = `${report.overallProgress.percentage}%`;
+    if (chDoneEl) chDoneEl.textContent = `${report.overallProgress.completedChapters} of ${report.overallProgress.totalChapters} High-Yield Chapters`;
+    if (studyMinEl) studyMinEl.textContent = `${report.studyEffort.focusMinutes}m`;
+    if (sprintEl) sprintEl.textContent = `${report.studyEffort.focusSessions} deep-work sprints`;
+    if (mockAccEl) mockAccEl.textContent = report.mockTests.totalAttempted > 0 ? `${report.mockTests.averageScore}%` : '—';
+    if (testsEl) testsEl.textContent = `${report.mockTests.totalAttempted} mock tests taken`;
+    if (fcMastEl) fcMastEl.textContent = `${report.flashcards.mastered} / ${report.flashcards.total}`;
+    if (fcPctEl) fcPctEl.textContent = `${report.flashcards.masteryPercentage}% active recall`;
+
+    // Subjects
+    const p = report.overallProgress.physics;
+    const c = report.overallProgress.chemistry;
+    const m = report.overallProgress.mathematics;
+
+    const pPctEl = document.getElementById('trkPhysicsPct');
+    const pFillEl = document.getElementById('trkPhysicsFill');
+    const pCntEl = document.getElementById('trkPhysicsCount');
+    if (pPctEl) pPctEl.textContent = `${p.percentage}%`;
+    if (pFillEl) pFillEl.style.width = `${p.percentage}%`;
+    if (pCntEl) pCntEl.textContent = `${p.completed} of ${p.total} Chapters Completed`;
+
+    const cPctEl = document.getElementById('trkChemPct');
+    const cFillEl = document.getElementById('trkChemFill');
+    const cCntEl = document.getElementById('trkChemCount');
+    if (cPctEl) cPctEl.textContent = `${c.percentage}%`;
+    if (cFillEl) cFillEl.style.width = `${c.percentage}%`;
+    if (cCntEl) cCntEl.textContent = `${c.completed} of ${c.total} Chapters Completed`;
+
+    const mPctEl = document.getElementById('trkMathsPct');
+    const mFillEl = document.getElementById('trkMathsFill');
+    const mCntEl = document.getElementById('trkMathsCount');
+    if (mPctEl) mPctEl.textContent = `${m.percentage}%`;
+    if (mFillEl) mFillEl.style.width = `${m.percentage}%`;
+    if (mCntEl) mCntEl.textContent = `${m.completed} of ${m.total} Chapters Completed`;
+
+    // Render interactive chapter chips for each subject
+    renderSubjectTrackerChips('physics', 'trkPhysicsChips');
+    renderSubjectTrackerChips('chemistry', 'trkChemChips');
+    renderSubjectTrackerChips('maths', 'trkMathsChips');
+
+    // Test History
+    const histList = document.getElementById('trkTestHistoryList');
+    if (histList) {
+        if (state.testHistory.length === 0) {
+            histList.innerHTML = '<p class="empty-state">No mock tests taken yet. Start a 25Q or 75Q test in the Mock Test arena!</p>';
+        } else {
+            histList.innerHTML = state.testHistory.slice(0, 5).map(t => `
+                <div class="tracker-history-item">
+                    <span><strong>${t.mode.toUpperCase()}</strong> · ${t.date}</span>
+                    <span style="font-weight:700; color:var(--accent-teal);">${t.marks}/${t.maxMarks} (${t.percentage}%)</span>
+                </div>
+            `).join('');
+        }
+    }
+
+    // Mistake Summary
+    const mistSummary = document.getElementById('trkMistakeSummary');
+    if (mistSummary) {
+        mistSummary.innerHTML = `
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                <span>Total Errors Logged: <strong>${report.mistakeDiary.totalLogged}</strong></span>
+                <span>Immune / Mastered: <strong style="color:var(--accent-green);">${report.mistakeDiary.masteredImmune}</strong></span>
+            </div>
+            <div style="font-size:13px; margin-bottom:12px;">
+                Resolution Rate: <strong>${report.mistakeDiary.resolutionRate}</strong> · Top Vulnerability: <span style="color:var(--accent-rose); font-weight:600;">${report.mistakeDiary.topVulnerability}</span>
+            </div>
+            <button class="btn-secondary" style="font-size:12px; padding:6px 14px;" onclick="navigateTo('mistakes')">Open Mistake Diary →</button>
+        `;
+    }
+}
+
+function renderSubjectTrackerChips(subject, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container || !chaptersData[subject]) return;
+
+    container.innerHTML = chaptersData[subject].map((ch, i) => {
+        const id = `${subject}-${i}`;
+        const done = state.completedChapters.has(id);
+        return `
+            <div class="trk-chip ${done ? 'done' : ''}" onclick="toggleChapter('${id}'); renderTrackerSection();" title="Click to toggle completed">
+                <span>${done ? '✓' : '○'} ${ch.name}</span>
+                <span style="font-size:10px; opacity:0.8;">${ch.weightage}%</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function downloadProgressReport() {
+    const report = getComprehensiveProgressReport();
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Nishu_Kumari_JEE_Progress_${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+}
+
+function openSyncModal() {
+    const modal = document.getElementById('syncModal');
+    const tokenInput = document.getElementById('ghTokenInput');
+    if (tokenInput) {
+        tokenInput.value = localStorage.getItem('nexa_github_token') || '';
+    }
+    if (modal) modal.classList.add('open');
+}
+
+function closeSyncModal(e) {
+    if (e && e.target && e.target.classList.contains('masterclass-modal')) return;
+    const modal = document.getElementById('syncModal');
+    if (modal) modal.classList.remove('open');
+}
+
+async function testGitHubConnection() {
+    const feedback = document.getElementById('syncFeedback');
+    const tokenInput = document.getElementById('ghTokenInput');
+    const token = tokenInput ? tokenInput.value.trim() : '';
+
+    if (feedback) {
+        feedback.style.display = 'block';
+        feedback.style.background = 'rgba(79, 209, 197, 0.1)';
+        feedback.style.color = 'var(--accent-teal)';
+        feedback.innerHTML = '⏳ Testing connection to GitHub repository...';
+    }
+
+    try {
+        const url = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/contents/${GITHUB_FILE_PATH}`;
+        const res = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${token || getGitHubToken()}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            if (feedback) {
+                feedback.style.background = 'rgba(72, 187, 120, 0.15)';
+                feedback.style.color = 'var(--accent-green)';
+                feedback.innerHTML = `✅ <strong>Connected!</strong> Target file <code>${data.name}</code> (${data.size} bytes) is ready for live auto-commits.`;
+            }
+        } else {
+            throw new Error(`GitHub error ${res.status}: check token permissions.`);
+        }
+    } catch (err) {
+        if (feedback) {
+            feedback.style.background = 'rgba(245, 101, 101, 0.15)';
+            feedback.style.color = 'var(--accent-rose)';
+            feedback.innerHTML = `❌ Connection failed: ${err.message}`;
+        }
+    }
+}
+
+function saveGitHubSettingsAndSync() {
+    const tokenInput = document.getElementById('ghTokenInput');
+    if (tokenInput && tokenInput.value.trim()) {
+        localStorage.setItem('nexa_github_token', tokenInput.value.trim());
+    }
+    syncProgressToGitHub(false);
+    closeSyncModal();
+}
+
 // ─── INITIALIZATION ─────────────────────────────
 function init() {
     loadState();
@@ -1989,9 +2483,14 @@ function init() {
     
     // Auto-render sections on first load
     renderChapters('all');
+    renderTrackerSection();
+
+    // Background sync on app launch
+    debouncedGitHubSync();
     
     console.log('🎯 Nexa JEE initialized for Nishu Kumari');
     console.log('📚 75 Chapters | 500+ Formulas | 35 Mock Questions | 16-Week Roadmap');
+    console.log('☁️ GitHub Cloud Persistence Active: student_progress.json');
 }
 
 // Run on load

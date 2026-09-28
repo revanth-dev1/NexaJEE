@@ -34,6 +34,10 @@
             </div>
         </div>
         <div class="header-right">
+            <div class="cloud-sync-pill" id="cloudSyncPill" onclick="openSyncModal()" title="GitHub Cloud Sync Active · Click to view status or settings">
+                <span class="sync-dot" id="syncStatusDot">🟢</span>
+                <span class="sync-text" id="syncStatusText">Synced</span>
+            </div>
             <div class="focus-timer-pill" id="focusTimerPill" onclick="toggleFocusTimer()" title="Click to Start/Pause Deep Work Focus Timer">
                 <span class="focus-timer-icon" id="focusTimerIcon">⏱️</span>
                 <span class="focus-timer-time" id="focusTimerDisplay">50:00</span>
@@ -60,6 +64,9 @@
         <div class="nav-scroll">
             <button class="nav-pill active" data-section="desk" id="nav-desk">
                 <span class="nav-icon">🏠</span> Desk
+            </button>
+            <button class="nav-pill" data-section="tracker" id="nav-tracker">
+                <span class="nav-icon">📊</span> Progress Tracker
             </button>
             <button class="nav-pill" data-section="roadmap" id="nav-roadmap">
                 <span class="nav-icon">🗺️</span> Roadmap
@@ -108,6 +115,7 @@
                     <p class="desk-subtitle">Master Physics, Chemistry & Mathematics with a structured 16-week battle plan. Built with love, powered by data from 10 years of JEE papers.</p>
                     <div class="desk-cta-row">
                         <button class="btn-primary" onclick="navigateTo('roadmap')">View Roadmap →</button>
+                        <button class="btn-secondary" onclick="navigateTo('tracker')">📊 Progress Tracker</button>
                         <button class="btn-secondary" onclick="navigateTo('mocktest')">Start Mock Test</button>
                     </div>
                 </div>
@@ -195,6 +203,126 @@
                 <div class="tip-card tip-amber">
                     <h3>🎯 Today's Priority</h3>
                     <p id="todayPriority">Start with high-weightage chapters in Physics — Mechanics & Electrodynamics carry 40% of physics marks!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════ STUDENT PROGRESS TRACKER SECTION ═══════════ -->
+        <section class="section section-tracker" id="section-tracker">
+            <div class="tracker-header-row">
+                <div>
+                    <h2 class="section-heading">Nishu's Real-Time Learning Tracker 📊</h2>
+                    <p class="section-sub">Live course progress, syllabus completion, focus study hours, and GitHub cloud persistence.</p>
+                </div>
+                <div class="tracker-sync-actions">
+                    <button class="btn-primary" onclick="syncProgressToGitHub(false)">☁️ Sync to GitHub Now</button>
+                    <button class="btn-secondary" onclick="downloadProgressReport()">📥 Download Dossier (JSON)</button>
+                    <button class="btn-secondary" onclick="openSyncModal()">⚙️ Sync Settings</button>
+                </div>
+            </div>
+
+            <!-- Live Sync Alert Banner -->
+            <div class="tracker-sync-banner" id="trackerSyncBanner">
+                <span class="sync-banner-icon">📡</span>
+                <div class="sync-banner-text">
+                    <div><strong>GitHub Cloud Storage:</strong> <span id="trackerSyncStatusText">Auto-Sync Enabled · Connected to revanth-dev1/NexaJEE</span></div>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:2px;" id="trackerLastSyncTime">Last Synced: Loading...</div>
+                </div>
+                <a href="https://github.com/revanth-dev1/NexaJEE/blob/main/student_progress.json" target="_blank" class="tracker-github-link">View student_progress.json on GitHub ↗</a>
+            </div>
+
+            <!-- Overview Stats Grid -->
+            <div class="tracker-stats-grid">
+                <div class="tracker-stat-card">
+                    <div class="tracker-stat-icon">📚</div>
+                    <div class="tracker-stat-val" id="trkSyllabusPct">0%</div>
+                    <div class="tracker-stat-lbl">Course Completed</div>
+                    <div class="tracker-stat-sub" id="trkChaptersDone">0 of 30 High-Yield Chapters</div>
+                </div>
+                <div class="tracker-stat-card">
+                    <div class="tracker-stat-icon">⏱️</div>
+                    <div class="tracker-stat-val" id="trkStudyMinutes">0m</div>
+                    <div class="tracker-stat-lbl">Deep-Work Focused</div>
+                    <div class="tracker-stat-sub" id="trkSprintCount">0 sprints completed</div>
+                </div>
+                <div class="tracker-stat-card">
+                    <div class="tracker-stat-icon">🎯</div>
+                    <div class="tracker-stat-val" id="trkMockAccuracy">—</div>
+                    <div class="tracker-stat-lbl">Mock Test Accuracy</div>
+                    <div class="tracker-stat-sub" id="trkTestsTaken">0 mock tests taken</div>
+                </div>
+                <div class="tracker-stat-card">
+                    <div class="tracker-stat-icon">🧠</div>
+                    <div class="tracker-stat-val" id="trkFlashcardsMastered">0 / 18</div>
+                    <div class="tracker-stat-lbl">Formula Mastery</div>
+                    <div class="tracker-stat-sub" id="trkFlashcardsPct">0% active recall</div>
+                </div>
+            </div>
+
+            <!-- Subject Completion Progress -->
+            <div class="tracker-subjects-container">
+                <h3 class="tracker-section-title">📘 Subject-wise Syllabus Completion & Chapter Checklist</h3>
+                <div class="tracker-subjects-grid">
+                    <!-- Physics Card -->
+                    <div class="tracker-subject-card physics">
+                        <div class="trk-subj-header">
+                            <span class="trk-subj-title">⚛️ Physics</span>
+                            <span class="trk-subj-pct" id="trkPhysicsPct">0%</span>
+                        </div>
+                        <div class="trk-subj-bar">
+                            <div class="trk-subj-fill physics" id="trkPhysicsFill" style="width:0%"></div>
+                        </div>
+                        <div class="trk-subj-meta" id="trkPhysicsCount">0 of 11 High-Weightage Chapters</div>
+                        <div class="trk-chapter-chips" id="trkPhysicsChips">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Chemistry Card -->
+                    <div class="tracker-subject-card chemistry">
+                        <div class="trk-subj-header">
+                            <span class="trk-subj-title">🧪 Chemistry</span>
+                            <span class="trk-subj-pct" id="trkChemPct">0%</span>
+                        </div>
+                        <div class="trk-subj-bar">
+                            <div class="trk-subj-fill chemistry" id="trkChemFill" style="width:0%"></div>
+                        </div>
+                        <div class="trk-subj-meta" id="trkChemCount">0 of 8 High-Weightage Chapters</div>
+                        <div class="trk-chapter-chips" id="trkChemChips">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Maths Card -->
+                    <div class="tracker-subject-card maths">
+                        <div class="trk-subj-header">
+                            <span class="trk-subj-title">📊 Mathematics</span>
+                            <span class="trk-subj-pct" id="trkMathsPct">0%</span>
+                        </div>
+                        <div class="trk-subj-bar">
+                            <div class="trk-subj-fill maths" id="trkMathsFill" style="width:0%"></div>
+                        </div>
+                        <div class="trk-subj-meta" id="trkMathsCount">0 of 11 High-Weightage Chapters</div>
+                        <div class="trk-chapter-chips" id="trkMathsChips">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deep Activity Log & Error Trajectory -->
+            <div class="tracker-split-grid">
+                <div class="tracker-panel">
+                    <h3 class="tracker-section-title">⏱️ Test & Sprint History</h3>
+                    <div class="tracker-history-list" id="trkTestHistoryList">
+                        <p class="empty-state">No mock tests or study records yet.</p>
+                    </div>
+                </div>
+                <div class="tracker-panel">
+                    <h3 class="tracker-section-title">📕 Mistake Immunity Status</h3>
+                    <div class="tracker-mistake-summary" id="trkMistakeSummary">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
             </div>
         </section>
@@ -633,6 +761,43 @@
             
             <div class="masterclass-body" id="masterclassBody">
                 <!-- Dynamically populated by openTopicMasterclass() -->
+            </div>
+        </div>
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- GITHUB CLOUD SYNC & DATA PERSISTENCE MODAL     -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="masterclass-modal-backdrop" id="syncModal" onclick="closeSyncModal(event)">
+        <div class="masterclass-modal" style="max-width:560px;" onclick="event.stopPropagation()">
+            <div class="masterclass-header">
+                <div class="masterclass-header-left">
+                    <span class="masterclass-badge">☁️ Cloud Persistence</span>
+                    <h2 class="masterclass-title" style="font-size:20px; margin-top:4px;">GitHub & Cloud Data Sync</h2>
+                </div>
+                <button class="masterclass-close" onclick="closeSyncModal()" title="Close">×</button>
+            </div>
+            <div class="masterclass-body" style="gap:16px;">
+                <p style="font-size:13.5px; color:var(--text-secondary); line-height:1.6; margin:0;">
+                    Nexa JEE records all of Nishu's course progress, completed chapters, study hours, mock scores, and error logs. When enabled, your progress is automatically saved to GitHub repository <strong>revanth-dev1/NexaJEE</strong> in file <code>student_progress.json</code>!
+                </p>
+
+                <div class="form-group">
+                    <label>Target Repository</label>
+                    <input type="text" id="ghRepoInput" class="mistake-input" value="revanth-dev1/NexaJEE" readonly style="opacity:0.85;">
+                </div>
+
+                <div class="form-group">
+                    <label>GitHub Personal Access Token (PAT)</label>
+                    <input type="password" id="ghTokenInput" class="mistake-input" placeholder="ghp_..." value="">
+                    <span style="font-size:11px; color:var(--text-muted); margin-top:2px;">Saved securely in your browser's private storage. Enables automatic commits on study milestones.</span>
+                </div>
+
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
+                    <button class="btn-primary" onclick="saveGitHubSettingsAndSync()">💾 Save & Sync Now</button>
+                    <button class="btn-secondary" onclick="testGitHubConnection()">🔍 Test Connection</button>
+                    <button class="btn-secondary" onclick="restoreProgressFromCloud()">📥 Restore from Cloud</button>
+                </div>
+
+                <div id="syncFeedback" style="display:none; font-size:13px; line-height:1.6; padding:10px 14px; border-radius:var(--radius-sm);"></div>
             </div>
         </div>
     </div>
