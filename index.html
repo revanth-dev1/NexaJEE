@@ -156,6 +156,9 @@
             <button class="nav-pill" data-section="doubts" id="nav-doubts">
                 <span class="nav-icon">💬</span> Doubts
             </button>
+            <button class="nav-pill nav-pill-admin" data-section="admin" id="nav-admin" style="display:none; border-color:rgba(246, 173, 85, 0.45); color:var(--accent-amber);">
+                <span class="nav-icon">🛡️</span> Admin Panel
+            </button>
             <button class="nav-pill nav-pill-logout" id="nav-logout" onclick="handleLogout(event)" title="Sign Out of Portal">
                 <span class="nav-icon">🚪</span> Sign Out
             </button>
@@ -176,8 +179,9 @@
                     <span class="admin-banner-desc">Viewing preparation records for <strong>Nishu Kumari</strong> · Syncing to <code>student_progress.json</code></span>
                 </div>
                 <div class="admin-banner-actions">
+                    <button class="btn-primary" onclick="openAdminPanel()" style="font-size:12px; padding:6px 14px; background:linear-gradient(135deg, var(--accent-amber), #dd6b20); color:#000; font-weight:700;">🛡️ Open Admin Panel</button>
                     <button class="btn-secondary" onclick="openSyncModal()" style="font-size:12px; padding:6px 12px;">☁️ Inspect Sync</button>
-                    <button class="btn-primary" onclick="exportData()" style="font-size:12px; padding:6px 12px;">📥 Export Backup</button>
+                    <button class="btn-secondary" onclick="exportData()" style="font-size:12px; padding:6px 12px;">📥 Export Backup</button>
                     <button class="btn-secondary" onclick="handleLogout(event)" style="font-size:12px; padding:6px 12px; background:rgba(245,101,101,0.18); border:1px solid rgba(245,101,101,0.45); color:#feb2b2;">🚪 Sign Out</button>
                 </div>
             </div>
@@ -818,6 +822,75 @@
             </div>
         </section>
 
+        <!-- ═══════════ ADMIN PANEL & MONITORING HUB ═══════════ -->
+        <section class="section section-admin" id="section-admin">
+            <div class="admin-panel-container">
+                <!-- Admin Header Card -->
+                <div class="admin-panel-header">
+                    <div class="admin-header-main">
+                        <div class="admin-header-badge">🛡️ Mentor & Faculty Supervision Console</div>
+                        <h1 class="admin-title">Candidate Command & Monitoring Desk</h1>
+                        <p class="admin-subtitle">Live learning analytics, module management, and granular safety controls for candidate <strong>Nishu Kumari</strong> (Target: JEE Main 2027).</p>
+                    </div>
+                    <div class="admin-header-actions">
+                        <button class="btn-primary" onclick="exportData()" title="Download Full JSON Snapshot">📥 Export Full Backup</button>
+                        <button class="btn-secondary" onclick="openSyncModal()" title="Inspect GitHub Cloud Sync">☁️ Cloud Persistence</button>
+                        <button class="btn-secondary" onclick="handleLogout(event)" style="border-color:rgba(245,101,101,0.4); color:#feb2b2;">🚪 Sign Out</button>
+                    </div>
+                </div>
+
+                <!-- Live Metrics Grid -->
+                <div class="admin-metrics-grid" id="adminMetricsGrid">
+                    <!-- Populated dynamically by renderAdminPanel() -->
+                </div>
+
+                <!-- Subject-Wise Mastery Bars -->
+                <div class="admin-subject-breakdown-card">
+                    <h3 class="admin-card-title">📚 Subject-Wise Progress & Syllabus Completion</h3>
+                    <div class="admin-subject-rows" id="adminSubjectRows">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Module Reset & Maintenance Center -->
+                <div class="admin-reset-center-card">
+                    <div class="admin-reset-header">
+                        <div>
+                            <span class="admin-reset-badge">⚙️ Granular Data & Module Management</span>
+                            <h3 class="admin-card-title" style="margin-top:4px;">Module-by-Module Reset Controls</h3>
+                            <p style="font-size:12.5px; color:var(--text-muted); margin:0;">
+                                Reset individual components if data needs recalculation or the candidate wishes to retake a section. Every reset requires explicit reconfirmation.
+                            </p>
+                        </div>
+                        <button class="btn-secondary" onclick="exportData()" style="font-size:12px; padding:6px 12px;">📥 Auto-Backup State</button>
+                    </div>
+
+                    <div class="admin-reset-grid" id="adminResetGrid">
+                        <!-- Populated dynamically with each module's stats and action buttons -->
+                    </div>
+                </div>
+
+                <!-- Danger Zone: Factory Reset -->
+                <div class="admin-danger-zone">
+                    <div class="danger-zone-content">
+                        <div class="danger-zone-title">🚨 Complete Profile Reset (Factory Reset)</div>
+                        <div class="danger-zone-desc">Permanently wipe all chapters, mock attempts, mistake diary, flashcard review states, study hours, streak, and badges back to Day 1 default state.</div>
+                    </div>
+                    <button class="btn-danger-pill" onclick="openResetConfirm('factory_reset', 'Complete Profile Factory Reset', 'This will wipe ALL progress records for Nishu Kumari and restore a clean Day 1 state.')">
+                        🚨 Factory Reset Entire Profile
+                    </button>
+                </div>
+
+                <!-- Activity Log / Audit Trail -->
+                <div class="admin-audit-card">
+                    <h3 class="admin-card-title">📋 Candidate Activity & History Audit</h3>
+                    <div class="admin-audit-list" id="adminAuditList">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- ═══════════════════════════════════════════════ -->
@@ -891,6 +964,53 @@
             </div>
         </div>
     </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- ADMIN RESET RECONFIRMATION MODAL               -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="masterclass-modal-backdrop" id="adminResetConfirmModal" style="display:none;" onclick="closeResetConfirmModal(event)">
+        <div class="masterclass-modal" style="max-width:540px;" onclick="event.stopPropagation()">
+            <div class="masterclass-header" style="border-bottom:1px solid rgba(245, 101, 101, 0.3);">
+                <div class="masterclass-header-left">
+                    <span class="masterclass-badge" id="resetModalBadge" style="background:rgba(245,101,101,0.2); color:#feb2b2; border-color:rgba(245,101,101,0.4);">⚠️ RECONFIRM RESET</span>
+                    <h2 class="masterclass-title" id="resetModalTitle" style="font-size:20px; margin-top:4px; color:#feb2b2;">Reconfirm Module Reset</h2>
+                </div>
+                <button class="masterclass-close" onclick="closeResetConfirmModal()" title="Cancel">×</button>
+            </div>
+            
+            <div class="masterclass-body" style="gap:16px;">
+                <p id="resetModalDetails" style="font-size:13.5px; color:var(--text-secondary); line-height:1.6; margin:0;">
+                    Please confirm before proceeding with this reset.
+                </p>
+
+                <div class="reset-impact-box">
+                    <span style="font-size:12px; font-weight:700; color:var(--accent-amber); text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:6px;">⚠️ Impact On Candidate Profile:</span>
+                    <p id="resetModalImpact" style="font-size:13px; color:var(--text-primary); margin:0; line-height:1.5;">
+                        Will clear progress for this module.
+                    </p>
+                </div>
+
+                <div class="reset-safety-notice">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12.5px; color:var(--text-secondary);">
+                        <input type="checkbox" id="resetBackupCheckbox" checked style="accent-color:var(--accent-teal); cursor:pointer;">
+                        <span>Create and download a JSON safety backup before resetting (Recommended)</span>
+                    </label>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:8px;">
+                    <button class="btn-secondary" onclick="closeResetConfirmModal()" style="padding:10px 18px;">
+                        ❌ Cancel & Keep Data
+                    </button>
+                    <button class="btn-danger-pill" id="btnExecuteReset" onclick="executePendingReset()" style="padding:10px 20px; font-weight:700;">
+                        🗑️ Yes, Reconfirm & Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Notification Toast Container -->
+    <div id="adminToastContainer" class="admin-toast-container"></div>
 
     <!-- Scripts -->
     <script src="data.js"></script>

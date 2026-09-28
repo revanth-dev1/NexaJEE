@@ -84,6 +84,7 @@ function navigateTo(section) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
     // Lazy render
+    if (section === 'admin') renderAdminPanel();
     if (section === 'tracker') renderTrackerSection();
     if (section === 'chapters' && !document.querySelector('.chapter-card')) renderChapters('all');
     if (section === 'formulas' && !document.querySelector('.formula-chapter')) renderFormulas('all');
@@ -2536,6 +2537,8 @@ function checkAuth() {
     const userAuthAvatar = document.getElementById('userAuthAvatar');
     const userAuthName = document.getElementById('userAuthName');
 
+    const navAdmin = document.getElementById('nav-admin');
+
     if (authUser.role === 'admin') {
         if (userRoleLabel) userRoleLabel.textContent = 'Role';
         if (studentName) studentName.textContent = 'Mentor / Admin';
@@ -2544,6 +2547,7 @@ function checkAuth() {
         if (userAuthAvatar) userAuthAvatar.textContent = '🛡️';
         if (userAuthName) userAuthName.textContent = 'Admin Mode';
         if (adminBanner) adminBanner.style.display = 'flex';
+        if (navAdmin) navAdmin.style.display = 'inline-flex';
     } else {
         if (userRoleLabel) userRoleLabel.textContent = 'Student';
         if (studentName) studentName.textContent = 'Nishu Kumari';
@@ -2552,6 +2556,8 @@ function checkAuth() {
         if (userAuthAvatar) userAuthAvatar.textContent = '👧';
         if (userAuthName) userAuthName.textContent = 'Nishu';
         if (adminBanner) adminBanner.style.display = 'none';
+        if (navAdmin) navAdmin.style.display = 'none';
+        if (state.currentSection === 'admin') navigateTo('desk');
     }
 
     return true;
@@ -2671,6 +2677,531 @@ function togglePasswordVisibility() {
         toggleBtn.textContent = '👁️ Show';
     }
 }
+
+// ─── ADMIN COMMAND & MONITORING CENTER ───────────
+function openAdminPanel() {
+    navigateTo('admin');
+}
+window.openAdminPanel = openAdminPanel;
+
+function showAdminToast(message, type = 'success') {
+    const container = document.getElementById('adminToastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `admin-toast ${type}`;
+    const icon = type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+    toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3800);
+}
+window.showAdminToast = showAdminToast;
+
+function exportData() {
+    try {
+        const report = getComprehensiveProgressReport();
+        const exportObj = {
+            metadata: {
+                appName: "Nexa JEE Preparation Desk",
+                candidate: "Nishu Kumari",
+                target: "JEE Main Jan 2027",
+                exportDate: new Date().toISOString(),
+                exportedBy: state.currentUser ? `${state.currentUser.name} (${state.currentUser.role})` : "Candidate"
+            },
+            summary: {
+                syllabusCompletion: `${state.completedChapters.size}/75 chapters (${Math.round((state.completedChapters.size/75)*100)}%)`,
+                xp: state.xp,
+                streak: state.streak,
+                focusHours: (((state.focusTimerSessions || 0) * 50) / 60).toFixed(1),
+                mockTestsTaken: state.testHistory.length,
+                mistakesLogged: state.userMistakes.length
+            },
+            rawState: {
+                completedChapters: [...state.completedChapters],
+                testHistory: state.testHistory,
+                badgesEarned: [...state.badgesEarned],
+                xp: state.xp,
+                streak: state.streak,
+                lastVisit: state.lastVisit,
+                doubtsAsked: state.doubtsAsked,
+                formulasViewed: state.formulasViewed,
+                userMistakes: state.userMistakes,
+                flashcardsMastery: state.flashcardsMastery,
+                focusTimerSessions: state.focusTimerSessions
+            }
+        };
+
+        const jsonStr = JSON.stringify(exportObj, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const dateStr = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = `NexaJEE_Backup_Nishu_${dateStr}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showAdminToast(`📥 Backup downloaded: ${a.download}`, 'success');
+    } catch (err) {
+        console.error('Export error:', err);
+        alert('Could not export backup: ' + err.message);
+    }
+}
+window.exportData = exportData;
+
+// Reconfirmation Modal Logic
+let pendingResetConfig = null;
+
+function openResetConfirm(moduleKey, moduleTitle, detailsText, targetParam = null) {
+    pendingResetConfig = {
+        key: moduleKey,
+        title: moduleTitle,
+        details: detailsText,
+        param: targetParam
+    };
+
+    const modal = document.getElementById('adminResetConfirmModal');
+    if (!modal) return;
+
+    const titleEl = document.getElementById('resetModalTitle');
+    const badgeEl = document.getElementById('resetModalBadge');
+    const detailsEl = document.getElementById('resetModalDetails');
+    const impactEl = document.getElementById('resetModalImpact');
+
+    if (titleEl) titleEl.textContent = `Reconfirm Reset: ${moduleTitle}`;
+    if (badgeEl) badgeEl.textContent = moduleKey === 'factory_reset' ? '🚨 CRITICAL FACTORY RESET' : '⚠️ IRREVERSIBLE ACTION';
+    if (detailsEl) detailsEl.textContent = detailsText;
+
+    let impactText = '';
+    if (moduleKey === 'all_chapters') {
+        impactText = `Will clear all ${state.completedChapters.size} completed chapter checkmarks across Physics, Chemistry, and Mathematics.`;
+    } else if (moduleKey === 'physics_chapters') {
+        const count = [...state.completedChapters].filter(c => c.startsWith('physics-')).length;
+        impactText = `Will uncheck ${count} completed Physics chapters.`;
+    } else if (moduleKey === 'chemistry_chapters') {
+        const count = [...state.completedChapters].filter(c => c.startsWith('chemistry-')).length;
+        impactText = `Will uncheck ${count} completed Chemistry chapters.`;
+    } else if (moduleKey === 'maths_chapters') {
+        const count = [...state.completedChapters].filter(c => c.startsWith('maths-')).length;
+        impactText = `Will uncheck ${count} completed Mathematics chapters.`;
+    } else if (moduleKey === 'single_chapter') {
+        impactText = `Will reset completion status for chapter: "${targetParam}".`;
+    } else if (moduleKey === 'mock_tests') {
+        impactText = `Will delete all ${state.testHistory.length} mock test scorecards and percentile records.`;
+    } else if (moduleKey === 'mistake_diary') {
+        impactText = `Will permanently erase ${state.userMistakes.length} logged revision mistakes.`;
+    } else if (moduleKey === 'flashcards') {
+        const count = Object.keys(state.flashcardsMastery).length;
+        impactText = `Will reset spaced repetition status for ${count} flashcards.`;
+    } else if (moduleKey === 'focus_sprints') {
+        impactText = `Will reset ${state.focusTimerSessions || 0} sprint sessions (0 hours logged).`;
+    } else if (moduleKey === 'streak') {
+        impactText = `Will reset current ${state.streak}-day streak to 0 days.`;
+    } else if (moduleKey === 'badges') {
+        impactText = `Will revoke all ${state.badgesEarned.size} unlocked achievement badges.`;
+    } else if (moduleKey === 'doubts') {
+        impactText = `Will reset doubt tracker counter to 0.`;
+    } else if (moduleKey === 'factory_reset') {
+        impactText = `🚨 DANGER: Will reset EVERYTHING (chapters, mock tests, mistakes, flashcards, focus timer, streak, badges) back to initial Day 1 state!`;
+    }
+
+    if (impactEl) impactEl.textContent = impactText;
+
+    modal.style.display = 'flex';
+}
+window.openResetConfirm = openResetConfirm;
+
+function closeResetConfirmModal(event) {
+    if (event && event.target && event.target.id !== 'adminResetConfirmModal' && !event.target.classList.contains('masterclass-close') && !event.target.closest('button')) {
+        return;
+    }
+    const modal = document.getElementById('adminResetConfirmModal');
+    if (modal) modal.style.display = 'none';
+    pendingResetConfig = null;
+}
+window.closeResetConfirmModal = closeResetConfirmModal;
+
+function executePendingReset() {
+    if (!pendingResetConfig) return;
+
+    const backupCheckbox = document.getElementById('resetBackupCheckbox');
+    if (backupCheckbox && backupCheckbox.checked) {
+        exportData();
+    }
+
+    const { key, title, param } = pendingResetConfig;
+
+    switch (key) {
+        case 'all_chapters':
+            state.completedChapters.clear();
+            break;
+        case 'physics_chapters':
+            state.completedChapters = new Set([...state.completedChapters].filter(c => !c.startsWith('physics-')));
+            break;
+        case 'chemistry_chapters':
+            state.completedChapters = new Set([...state.completedChapters].filter(c => !c.startsWith('chemistry-')));
+            break;
+        case 'maths_chapters':
+            state.completedChapters = new Set([...state.completedChapters].filter(c => !c.startsWith('maths-')));
+            break;
+        case 'single_chapter':
+            if (param) state.completedChapters.delete(param);
+            break;
+        case 'mock_tests':
+            state.testHistory = [];
+            break;
+        case 'mistake_diary':
+            state.userMistakes = [];
+            break;
+        case 'flashcards':
+            state.flashcardsMastery = {};
+            break;
+        case 'focus_sprints':
+            state.focusTimerSessions = 0;
+            break;
+        case 'streak':
+            state.streak = 0;
+            break;
+        case 'badges':
+            state.badgesEarned.clear();
+            break;
+        case 'doubts':
+            state.doubtsAsked = 0;
+            break;
+        case 'factory_reset':
+            state.completedChapters.clear();
+            state.testHistory = [];
+            state.badgesEarned.clear();
+            state.xp = 0;
+            state.streak = 0;
+            state.doubtsAsked = 0;
+            state.formulasViewed = 0;
+            state.userMistakes = [];
+            state.flashcardsMastery = {};
+            state.focusTimerSessions = 0;
+            break;
+    }
+
+    // Save and sync
+    saveState();
+    updateProgress();
+    updateStreak();
+    if (typeof renderBadges === 'function') renderBadges();
+    if (typeof renderChapters === 'function') renderChapters('all');
+    if (typeof renderTrackerSection === 'function') renderTrackerSection();
+    if (typeof renderMockHistory === 'function') renderMockHistory();
+    if (typeof renderMistakeList === 'function') renderMistakeList();
+    if (typeof updateFocusTimerDisplay === 'function') updateFocusTimerDisplay();
+
+    // Re-render Admin Panel view
+    renderAdminPanel();
+
+    closeResetConfirmModal();
+
+    showAdminToast(`✅ Successfully reset: ${title}. Cloud sync triggered.`, 'success');
+}
+window.executePendingReset = executePendingReset;
+
+function resetSelectedSingleChapter() {
+    const sel = document.getElementById('adminSingleChapterSelect');
+    if (!sel || !sel.value) return;
+    const chId = sel.value;
+    const chText = sel.options[sel.selectedIndex].text;
+    openResetConfirm('single_chapter', `Single Chapter`, `Uncheck completion checkmark for "${chText}".`, chId);
+}
+window.resetSelectedSingleChapter = resetSelectedSingleChapter;
+
+function renderAdminPanel() {
+    const report = getComprehensiveProgressReport();
+
+    // 1. Live Metrics Grid
+    const metricsGrid = document.getElementById('adminMetricsGrid');
+    if (metricsGrid) {
+        metricsGrid.innerHTML = `
+            <div class="admin-metric-card" style="border-top:3px solid var(--accent-teal);">
+                <div class="admin-metric-icon">📚</div>
+                <div class="admin-metric-label">Syllabus Covered</div>
+                <div class="admin-metric-value">${report.overallSyllabus.completedChapters} <span style="font-size:16px; color:var(--text-muted); font-weight:500;">/ ${report.overallSyllabus.totalChapters}</span></div>
+                <div class="admin-metric-sub">${report.overallSyllabus.percentage}% syllabus completed across 3 subjects</div>
+            </div>
+            <div class="admin-metric-card" style="border-top:3px solid var(--accent-blue);">
+                <div class="admin-metric-icon">⏱️</div>
+                <div class="admin-metric-label">Mock Tests & Avg</div>
+                <div class="admin-metric-value">${report.mockTests.totalAttempted} <span style="font-size:16px; color:var(--text-muted); font-weight:500;">tests</span></div>
+                <div class="admin-metric-sub">Avg Score: ${report.mockTests.averageScore}% · Best: ${report.mockTests.bestScore}%</div>
+            </div>
+            <div class="admin-metric-card" style="border-top:3px solid var(--accent-amber);">
+                <div class="admin-metric-icon">🔥</div>
+                <div class="admin-metric-label">Effort & Streak</div>
+                <div class="admin-metric-value">${report.studyEffort.streakDays} <span style="font-size:16px; color:var(--text-muted); font-weight:500;">days</span></div>
+                <div class="admin-metric-sub">${report.studyEffort.focusSessions} deep sprints (${(report.studyEffort.focusMinutes / 60).toFixed(1)} hrs total)</div>
+            </div>
+            <div class="admin-metric-card" style="border-top:3px solid var(--accent-rose);">
+                <div class="admin-metric-icon">📕</div>
+                <div class="admin-metric-label">Mistake Diary</div>
+                <div class="admin-metric-value">${report.mistakeDiary.totalLogged} <span style="font-size:16px; color:var(--text-muted); font-weight:500;">errors</span></div>
+                <div class="admin-metric-sub">Top weakness: ${report.mistakeDiary.topVulnerability}</div>
+            </div>
+        `;
+    }
+
+    // 2. Subject Breakdown
+    const subRows = document.getElementById('adminSubjectRows');
+    if (subRows) {
+        subRows.innerHTML = `
+            <div class="admin-subject-row">
+                <div class="admin-subject-row-header">
+                    <span style="color:var(--physics-color);">⚛️ Physics</span>
+                    <span>${report.subjects.physics.completed} / ${report.subjects.physics.total} Chapters (${report.subjects.physics.percentage}%)</span>
+                </div>
+                <div class="admin-subject-track">
+                    <div class="admin-subject-fill" style="width:${report.subjects.physics.percentage}%; background:linear-gradient(90deg, var(--physics-color), var(--accent-blue));"></div>
+                </div>
+            </div>
+            <div class="admin-subject-row">
+                <div class="admin-subject-row-header">
+                    <span style="color:var(--chemistry-color);">🧪 Chemistry</span>
+                    <span>${report.subjects.chemistry.completed} / ${report.subjects.chemistry.total} Chapters (${report.subjects.chemistry.percentage}%)</span>
+                </div>
+                <div class="admin-subject-track">
+                    <div class="admin-subject-fill" style="width:${report.subjects.chemistry.percentage}%; background:linear-gradient(90deg, var(--chemistry-color), var(--accent-teal));"></div>
+                </div>
+            </div>
+            <div class="admin-subject-row">
+                <div class="admin-subject-row-header">
+                    <span style="color:var(--maths-color);">📐 Mathematics</span>
+                    <span>${report.subjects.maths.completed} / ${report.subjects.maths.total} Chapters (${report.subjects.maths.percentage}%)</span>
+                </div>
+                <div class="admin-subject-track">
+                    <div class="admin-subject-fill" style="width:${report.subjects.maths.percentage}%; background:linear-gradient(90deg, var(--maths-color), var(--accent-purple));"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    // 3. Module Reset Matrix
+    const resetGrid = document.getElementById('adminResetGrid');
+    if (resetGrid) {
+        let chapterOptionsHtml = '';
+        ['physics', 'chemistry', 'maths'].forEach(sub => {
+            const list = chaptersData[sub] || [];
+            list.forEach((ch, idx) => {
+                const chId = `${sub}-${idx}`;
+                const isDone = state.completedChapters.has(chId);
+                chapterOptionsHtml += `<option value="${chId}">[${sub.toUpperCase()}] ${ch.name} ${isDone ? '✓ (Completed)' : '○ (Pending)'}</option>`;
+            });
+        });
+
+        resetGrid.innerHTML = `
+            <!-- Card 1: Chapters & Syllabus -->
+            <div class="admin-reset-card">
+                <div class="admin-reset-top">
+                    <div class="admin-reset-icon">📚</div>
+                    <div class="admin-reset-info">
+                        <div class="admin-reset-title">Chapter Learnings & Syllabus Checkboxes</div>
+                        <span class="admin-reset-count-badge">${state.completedChapters.size} / 75 chapters marked complete</span>
+                        <div class="admin-reset-desc">Uncheck completed chapter status. You can reset all 75 chapters, reset by subject, or reset any individual chapter.</div>
+                    </div>
+                </div>
+                <div class="admin-reset-actions">
+                    <button class="btn-danger-pill" onclick="openResetConfirm('all_chapters', 'All 75 Chapters Progress', 'Uncheck all completed chapters across Physics, Chemistry, and Mathematics.')">
+                        🗑️ Reset All 75
+                    </button>
+                    <button class="btn-danger-pill" onclick="openResetConfirm('physics_chapters', 'Physics Chapters (25)', 'Uncheck all completed Physics chapters.')">
+                        ⚛️ Reset Physics
+                    </button>
+                    <button class="btn-danger-pill" onclick="openResetConfirm('chemistry_chapters', 'Chemistry Chapters (25)', 'Uncheck all completed Chemistry chapters.')">
+                        🧪 Reset Chemistry
+                    </button>
+                    <button class="btn-danger-pill" onclick="openResetConfirm('maths_chapters', 'Mathematics Chapters (25)', 'Uncheck all completed Mathematics chapters.')">
+                        📐 Reset Maths
+                    </button>
+                </div>
+                <div style="margin-top:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; background:rgba(0,0,0,0.2); padding:10px; border-radius:var(--radius-sm); border:1px solid var(--border-subtle);">
+                    <span style="font-size:11.5px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Single Chapter:</span>
+                    <select id="adminSingleChapterSelect" class="mistake-select" style="font-size:12px; padding:4px 8px; flex:1; min-width:200px;">
+                        ${chapterOptionsHtml}
+                    </select>
+                    <button class="btn-danger-pill" style="padding:4px 10px; font-size:11.5px;" onclick="resetSelectedSingleChapter()">
+                        Uncheck Chapter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 2: Mock Tests -->
+            <div class="admin-reset-card">
+                <div class="admin-reset-top">
+                    <div class="admin-reset-icon">⏱️</div>
+                    <div class="admin-reset-info">
+                        <div class="admin-reset-title">Mock Test Scorecards & History</div>
+                        <span class="admin-reset-count-badge">${state.testHistory.length} mock tests logged</span>
+                        <div class="admin-reset-desc">Clears all recorded test attempts, question logs, percentile estimates, and history items in Mock Test & Progress Tracker.</div>
+                    </div>
+                </div>
+                <div class="admin-reset-actions">
+                    <button class="btn-danger-pill" onclick="openResetConfirm('mock_tests', 'Mock Test Scorecards & History', 'Permanently clear all completed test scores and percentile records.')">
+                        🗑️ Reset Mock Test History
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 3: Mistake Diary -->
+            <div class="admin-reset-card">
+                <div class="admin-reset-top">
+                    <div class="admin-reset-icon">📕</div>
+                    <div class="admin-reset-info">
+                        <div class="admin-reset-title">Mistake Diary & Revision Journal</div>
+                        <span class="admin-reset-count-badge">${state.userMistakes.length} mistakes recorded</span>
+                        <div class="admin-reset-desc">Clears candidate-logged errors, trap classifications, golden rules, and revision bookmarks in Mistake Diary.</div>
+                    </div>
+                </div>
+                <div class="admin-reset-actions">
+                    <button class="btn-danger-pill" onclick="openResetConfirm('mistake_diary', 'Mistake Diary & Revision Journal', 'Permanently delete all logged exam mistakes and error notes.')">
+                        🗑️ Clear Mistake Diary
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 4: Flashcards SRS -->
+            <div class="admin-reset-card">
+                <div class="admin-reset-top">
+                    <div class="admin-reset-icon">🧠</div>
+                    <div class="admin-reset-info">
+                        <div class="admin-reset-title">Flashcards Mastery & Spaced Repetition</div>
+                        <span class="admin-reset-count-badge">${Object.keys(state.flashcardsMastery).length} cards reviewed</span>
+                        <div class="admin-reset-desc">Resets all flashcard confidence ratings (Hard, Medium, Mastered) back to fresh unreviewed state in the Flashcards Arena.</div>
+                    </div>
+                </div>
+                <div class="admin-reset-actions">
+                    <button class="btn-danger-pill" onclick="openResetConfirm('flashcards', 'Flashcard SRS Learning Data', 'Reset all card ratings and mastered intervals back to unreviewed state.')">
+                        🗑️ Reset Flashcard Progress
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 5: Focus Timer -->
+            <div class="admin-reset-card">
+                <div class="admin-reset-top">
+                    <div class="admin-reset-icon">⏱️</div>
+                    <div class="admin-reset-info">
+                        <div class="admin-reset-title">Deep Work Sprints & Focus Hours</div>
+                        <span class="admin-reset-count-badge">${state.focusTimerSessions || 0} sprints (${(((state.focusTimerSessions || 0) * 50) / 60).toFixed(1)} hrs)</span>
+                        <div class="admin-reset-desc">Resets completed 50-minute deep work focus sprints and study duration counters back to 0.</div>
+                    </div>
+                </div>
+                <div class="admin-reset-actions">
+                    <button class="btn-danger-pill" onclick="openResetConfirm('focus_sprints', 'Deep Work Sprints & Focus Hours', 'Reset completed sprint sessions and study hours to 0.')">
+                        🗑️ Reset Sprint Logs
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 6: Streak & Badges -->
+            <div class="admin-reset-card">
+                <div class="admin-reset-top">
+                    <div class="admin-reset-icon">🏆</div>
+                    <div class="admin-reset-info">
+                        <div class="admin-reset-title">Streak Counter & Achievement Badges</div>
+                        <span class="admin-reset-count-badge">Streak: ${state.streak} days · ${state.badgesEarned.size} badges</span>
+                        <div class="admin-reset-desc">Reset the candidate's active daily streak counter or revoke unlocked achievement badges.</div>
+                    </div>
+                </div>
+                <div class="admin-reset-actions">
+                    <button class="btn-danger-pill" onclick="openResetConfirm('streak', 'Daily Study Streak Counter', 'Reset current study streak counter back to 0 days.')">
+                        🔥 Reset Streak to 0
+                    </button>
+                    <button class="btn-danger-pill" onclick="openResetConfirm('badges', 'Earned Badges & Achievements', 'Revoke all unlocked achievement badges.')">
+                        🏆 Reset Badges
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 7: Doubts Counter -->
+            <div class="admin-reset-card">
+                <div class="admin-reset-top">
+                    <div class="admin-reset-icon">💬</div>
+                    <div class="admin-reset-info">
+                        <div class="admin-reset-title">Doubts Counter</div>
+                        <span class="admin-reset-count-badge">${state.doubtsAsked || 0} doubts logged</span>
+                        <div class="admin-reset-desc">Reset the doubts counter and discussion engagement metric back to 0.</div>
+                    </div>
+                </div>
+                <div class="admin-reset-actions">
+                    <button class="btn-danger-pill" onclick="openResetConfirm('doubts', 'Doubts Counter', 'Reset total doubts asked counter back to 0.')">
+                        🗑️ Reset Doubts Counter
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // 4. Candidate Activity & History Audit
+    const auditList = document.getElementById('adminAuditList');
+    if (auditList) {
+        const events = [];
+
+        // Add mock tests
+        (state.testHistory || []).forEach(t => {
+            events.push({
+                type: 'Mock Test',
+                badgeBg: 'rgba(79, 209, 197, 0.15)',
+                badgeColor: 'var(--accent-teal)',
+                icon: '⏱️',
+                desc: `${t.subject.toUpperCase()} Mock Test: ${t.score}/${t.total} (${t.pct}%)`,
+                date: t.date || 'Recent'
+            });
+        });
+
+        // Add completed chapters
+        (state.completedChapters || new Set()).forEach(chId => {
+            const [sub, idx] = chId.split('-');
+            const chName = chaptersData[sub] && chaptersData[sub][parseInt(idx)] ? chaptersData[sub][parseInt(idx)].name : chId;
+            events.push({
+                type: 'Chapter Done',
+                badgeBg: 'rgba(246, 173, 85, 0.15)',
+                badgeColor: 'var(--accent-amber)',
+                icon: '📚',
+                desc: `[${sub.toUpperCase()}] Completed: ${chName}`,
+                date: 'Completed'
+            });
+        });
+
+        // Add mistakes
+        (state.userMistakes || []).forEach(m => {
+            events.push({
+                type: 'Error Logged',
+                badgeBg: 'rgba(245, 101, 101, 0.15)',
+                badgeColor: '#feb2b2',
+                icon: '📕',
+                desc: `[${m.subject}] ${m.chapter}: ${m.text.slice(0, 45)}...`,
+                date: m.date || 'Recent'
+            });
+        });
+
+        if (events.length === 0) {
+            auditList.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-muted); font-size:13px;">No candidate activity recorded yet. As Nishu studies, mock tests, chapters, and mistakes will stream here in real time.</div>`;
+        } else {
+            auditList.innerHTML = events.slice(0, 15).map(ev => `
+                <div class="admin-audit-item">
+                    <div class="admin-audit-item-left">
+                        <span class="admin-audit-badge" style="background:${ev.badgeBg}; color:${ev.badgeColor};">${ev.icon} ${ev.type}</span>
+                        <span style="font-weight:500; color:var(--text-primary);">${ev.desc}</span>
+                    </div>
+                    <span class="admin-audit-time">${ev.date}</span>
+                </div>
+            `).join('');
+        }
+    }
+}
+window.renderAdminPanel = renderAdminPanel;
 
 // ─── INITIALIZATION ─────────────────────────────
 function init() {
