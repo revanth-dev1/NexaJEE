@@ -2471,8 +2471,180 @@ function saveGitHubSettingsAndSync() {
     closeSyncModal();
 }
 
+// ═══════════════════════════════════════════════════
+// USER AUTHENTICATION & MULTI-ROLE ACCESS
+// ═══════════════════════════════════════════════════
+
+const AUTH_USERS = {
+    "nishu2026": {
+        password: "Nishu@12345",
+        role: "student",
+        name: "Nishu Kumari",
+        avatar: "👧"
+    },
+    "admin": {
+        password: "Admin@12345",
+        role: "admin",
+        name: "Mentor / Admin (Revanth)",
+        avatar: "🛡️"
+    }
+};
+
+function checkAuth() {
+    let authUser = null;
+    try {
+        const savedAuth = localStorage.getItem('nexa_auth_user');
+        if (savedAuth) {
+            authUser = JSON.parse(savedAuth);
+        }
+    } catch (e) {
+        console.warn('Auth parse error:', e);
+    }
+
+    const authScreen = document.getElementById('authScreen');
+    const header = document.getElementById('header');
+    const nav = document.getElementById('nav');
+    const main = document.getElementById('mainContent');
+    const footer = document.querySelector('.footer');
+    const adminBanner = document.getElementById('adminSupervisionBanner');
+
+    if (!authUser || !AUTH_USERS[authUser.username]) {
+        // Not authenticated
+        state.currentUser = null;
+        if (authScreen) authScreen.style.display = 'flex';
+        if (header) header.style.display = 'none';
+        if (nav) nav.style.display = 'none';
+        if (main) main.style.display = 'none';
+        if (footer) footer.style.display = 'none';
+        return false;
+    }
+
+    // Authenticated
+    state.currentUser = authUser;
+    if (authScreen) authScreen.style.display = 'none';
+    if (header) header.style.display = 'flex';
+    if (nav) nav.style.display = 'block';
+    if (main) main.style.display = 'block';
+    if (footer) footer.style.display = 'block';
+
+    // Update UI for Role
+    const userRoleLabel = document.getElementById('userRoleLabel');
+    const studentName = document.getElementById('studentName');
+    const targetLabel = document.getElementById('targetLabel');
+    const targetName = document.getElementById('targetName');
+    const userAuthAvatar = document.getElementById('userAuthAvatar');
+    const userAuthName = document.getElementById('userAuthName');
+
+    if (authUser.role === 'admin') {
+        if (userRoleLabel) userRoleLabel.textContent = 'Role';
+        if (studentName) studentName.textContent = 'Mentor / Admin';
+        if (targetLabel) targetLabel.textContent = 'Supervising';
+        if (targetName) targetName.textContent = 'Nishu Kumari (2027)';
+        if (userAuthAvatar) userAuthAvatar.textContent = '🛡️';
+        if (userAuthName) userAuthName.textContent = 'Admin Mode';
+        if (adminBanner) adminBanner.style.display = 'flex';
+    } else {
+        if (userRoleLabel) userRoleLabel.textContent = 'Student';
+        if (studentName) studentName.textContent = 'Nishu Kumari';
+        if (targetLabel) targetLabel.textContent = 'Target';
+        if (targetName) targetName.textContent = 'JEE Main · Jan 2027';
+        if (userAuthAvatar) userAuthAvatar.textContent = '👧';
+        if (userAuthName) userAuthName.textContent = 'Nishu';
+        if (adminBanner) adminBanner.style.display = 'none';
+    }
+
+    return true;
+}
+
+function handleLogin() {
+    const userEl = document.getElementById('authUsername');
+    const pwdEl = document.getElementById('authPassword');
+    const errorEl = document.getElementById('authErrorMsg');
+
+    if (!userEl || !pwdEl) return;
+    const username = userEl.value.trim().toLowerCase();
+    const password = pwdEl.value;
+
+    const matchedUser = AUTH_USERS[username];
+    if (matchedUser && matchedUser.password === password) {
+        if (errorEl) errorEl.style.display = 'none';
+
+        const session = {
+            username: username,
+            role: matchedUser.role,
+            name: matchedUser.name,
+            avatar: matchedUser.avatar,
+            loginTime: new Date().toISOString()
+        };
+
+        localStorage.setItem('nexa_auth_user', JSON.stringify(session));
+        state.currentUser = session;
+
+        // Reset fields
+        pwdEl.value = '';
+
+        // Initialize user experience
+        init();
+    } else {
+        if (errorEl) {
+            errorEl.style.display = 'block';
+            errorEl.textContent = '❌ Invalid username or password. Please verify your credentials.';
+        }
+    }
+}
+
+function handleLogout() {
+    if (!confirm('Are you sure you want to sign out of the portal?')) return;
+    localStorage.removeItem('nexa_auth_user');
+    state.currentUser = null;
+
+    const pwdEl = document.getElementById('authPassword');
+    if (pwdEl) pwdEl.value = '';
+
+    const errorEl = document.getElementById('authErrorMsg');
+    if (errorEl) errorEl.style.display = 'none';
+
+    checkAuth();
+}
+
+function fillCredentials(username, password) {
+    const userEl = document.getElementById('authUsername');
+    const pwdEl = document.getElementById('authPassword');
+    const errorEl = document.getElementById('authErrorMsg');
+
+    if (userEl) userEl.value = username;
+    if (pwdEl) pwdEl.value = password;
+    if (errorEl) errorEl.style.display = 'none';
+
+    const btn = document.getElementById('btnSignIn');
+    if (btn) {
+        btn.focus();
+        btn.style.transform = 'scale(1.02)';
+        setTimeout(() => { btn.style.transform = ''; }, 200);
+    }
+}
+
+function togglePasswordVisibility() {
+    const pwdEl = document.getElementById('authPassword');
+    const toggleBtn = document.getElementById('btnTogglePwd');
+    if (!pwdEl || !toggleBtn) return;
+
+    if (pwdEl.type === 'password') {
+        pwdEl.type = 'text';
+        toggleBtn.textContent = '🙈 Hide';
+    } else {
+        pwdEl.type = 'password';
+        toggleBtn.textContent = '👁️ Show';
+    }
+}
+
 // ─── INITIALIZATION ─────────────────────────────
 function init() {
+    const isAuthenticated = checkAuth();
+    if (!isAuthenticated) {
+        return; // Awaiting login
+    }
+
     loadState();
     updateGreeting();
     updateStreak();
@@ -2488,7 +2660,7 @@ function init() {
     // Background sync on app launch
     debouncedGitHubSync();
     
-    console.log('🎯 Nexa JEE initialized for Nishu Kumari');
+    console.log(`🎯 Nexa JEE initialized for ${state.currentUser ? state.currentUser.name : 'Candidate'}`);
     console.log('📚 75 Chapters | 500+ Formulas | 35 Mock Questions | 16-Week Roadmap');
     console.log('☁️ GitHub Cloud Persistence Active: student_progress.json');
 }

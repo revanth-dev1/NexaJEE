@@ -13,6 +13,56 @@
 </head>
 <body>
     <!-- ═══════════════════════════════════════════════ -->
+    <!-- AUTHENTICATION / LOGIN PORTAL SCREEN           -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="auth-screen" id="authScreen" style="display:none;">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo-badge">🎯 NEXA JEE 2027</div>
+                <h1 class="auth-title">Candidate & Mentor Portal</h1>
+                <p class="auth-sub">Sign in to access personalized JEE preparation desk, study history, and real-time cloud tracking.</p>
+            </div>
+
+            <form class="auth-form" onsubmit="event.preventDefault(); handleLogin();">
+                <div class="auth-error" id="authErrorMsg" style="display:none;"></div>
+
+                <div class="form-group">
+                    <label for="authUsername">Username / ID</label>
+                    <input type="text" id="authUsername" class="mistake-input auth-input" placeholder="e.g. nishu2026 or admin" autocomplete="username" required>
+                </div>
+
+                <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label for="authPassword">Access Password</label>
+                        <button type="button" class="btn-toggle-pwd" onclick="togglePasswordVisibility()" id="btnTogglePwd">👁️ Show</button>
+                    </div>
+                    <input type="password" id="authPassword" class="mistake-input auth-input" placeholder="Enter password" autocomplete="current-password" required>
+                </div>
+
+                <button type="submit" class="btn-primary auth-submit-btn" id="btnSignIn">
+                    🔐 Sign In to Preparation Desk
+                </button>
+            </form>
+
+            <div class="auth-quick-select">
+                <p class="auth-quick-label">⚡ Fast Sign-in (Pre-configured Credentials):</p>
+                <div class="auth-quick-row">
+                    <button type="button" class="btn-quick-cred student" onclick="fillCredentials('nishu2026', 'Nishu@12345')">
+                        👧 Nishu Kumari (Student)
+                    </button>
+                    <button type="button" class="btn-quick-cred admin" onclick="fillCredentials('admin', 'Admin@12345')">
+                        🛡️ Mentor / Admin
+                    </button>
+                </div>
+            </div>
+
+            <div class="auth-footer-note">
+                <span>🔒 Encrypted Credentials · Real-Time GitHub Cloud Persistence</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
     <!-- HEADER -->
     <!-- ═══════════════════════════════════════════════ -->
     <header class="header" id="header">
@@ -25,15 +75,20 @@
         </div>
         <div class="header-center">
             <div class="student-info">
-                <span class="student-label">Student</span>
+                <span class="student-label" id="userRoleLabel">Student</span>
                 <span class="student-name" id="studentName">Nishu Kumari</span>
             </div>
             <div class="target-info">
-                <span class="target-label">Target</span>
-                <span class="target-name">JEE Main · Jan 2027</span>
+                <span class="target-label" id="targetLabel">Target</span>
+                <span class="target-name" id="targetName">JEE Main · Jan 2027</span>
             </div>
         </div>
         <div class="header-right">
+            <div class="user-auth-pill" id="userAuthPill" title="Current Session User">
+                <span class="user-auth-avatar" id="userAuthAvatar">👧</span>
+                <span class="user-auth-name" id="userAuthName">Nishu</span>
+                <button class="btn-logout" id="btnLogout" onclick="handleLogout()" title="Sign Out / Change User">↪</button>
+            </div>
             <div class="cloud-sync-pill" id="cloudSyncPill" onclick="openSyncModal()" title="GitHub Cloud Sync Active · Click to view status or settings">
                 <span class="sync-dot" id="syncStatusDot">🟢</span>
                 <span class="sync-text" id="syncStatusText">Synced</span>
@@ -218,6 +273,21 @@
                     <button class="btn-primary" onclick="syncProgressToGitHub(false)">☁️ Sync to GitHub Now</button>
                     <button class="btn-secondary" onclick="downloadProgressReport()">📥 Download Dossier (JSON)</button>
                     <button class="btn-secondary" onclick="openSyncModal()">⚙️ Sync Settings</button>
+                </div>
+            </div>
+
+            <!-- Admin Supervision Banner (Visible only for admin login) -->
+            <div class="admin-supervision-banner" id="adminSupervisionBanner" style="display:none;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:24px;">🛡️</span>
+                    <div>
+                        <strong style="color:var(--accent-amber);">Mentor Supervision Mode Active:</strong> Auditing Nishu Kumari's complete learning records.
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Administrator role has full audit rights, token override, and cloud sync control.</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-secondary" style="font-size:12px; padding:6px 12px;" onclick="syncProgressToGitHub(false)">Force Sync Now</button>
+                    <button class="btn-secondary" style="font-size:12px; padding:6px 12px;" onclick="restoreProgressFromCloud()">Pull Remote Data</button>
                 </div>
             </div>
 
