@@ -84,10 +84,13 @@
             </div>
         </div>
         <div class="header-right">
-            <div class="user-auth-pill" id="userAuthPill" title="Current Session User">
+            <div class="user-auth-pill" id="userAuthPill" title="Current session user · Click Sign Out to change user">
                 <span class="user-auth-avatar" id="userAuthAvatar">👧</span>
                 <span class="user-auth-name" id="userAuthName">Nishu</span>
-                <button class="btn-logout" id="btnLogout" onclick="handleLogout()" title="Sign Out / Change User">↪</button>
+                <button class="btn-logout" id="btnLogout" onclick="handleLogout(event)" title="Sign Out / Switch User">
+                    <span class="logout-icon">🚪</span>
+                    <span class="logout-text">Sign Out</span>
+                </button>
             </div>
             <div class="cloud-sync-pill" id="cloudSyncPill" onclick="openSyncModal()" title="GitHub Cloud Sync Active · Click to view status or settings">
                 <span class="sync-dot" id="syncStatusDot">🟢</span>
@@ -153,6 +156,9 @@
             <button class="nav-pill" data-section="doubts" id="nav-doubts">
                 <span class="nav-icon">💬</span> Doubts
             </button>
+            <button class="nav-pill nav-pill-logout" id="nav-logout" onclick="handleLogout(event)" title="Sign Out of Portal">
+                <span class="nav-icon">🚪</span> Sign Out
+            </button>
         </div>
     </nav>
 
@@ -163,6 +169,19 @@
 
         <!-- ═══════════ DESK SECTION ═══════════ -->
         <section class="section section-desk active" id="section-desk">
+            <!-- Admin Supervision Banner (Visible only for admin role) -->
+            <div class="admin-supervision-banner" id="adminSupervisionBanner" style="display:none;">
+                <div class="admin-banner-left">
+                    <span class="admin-badge">🛡️ Mentor & Supervisor Mode</span>
+                    <span class="admin-banner-desc">Viewing preparation records for <strong>Nishu Kumari</strong> · Syncing to <code>student_progress.json</code></span>
+                </div>
+                <div class="admin-banner-actions">
+                    <button class="btn-secondary" onclick="openSyncModal()" style="font-size:12px; padding:6px 12px;">☁️ Inspect Sync</button>
+                    <button class="btn-primary" onclick="exportData()" style="font-size:12px; padding:6px 12px;">📥 Export Backup</button>
+                    <button class="btn-secondary" onclick="handleLogout(event)" style="font-size:12px; padding:6px 12px; background:rgba(245,101,101,0.18); border:1px solid rgba(245,101,101,0.45); color:#feb2b2;">🚪 Sign Out</button>
+                </div>
+            </div>
+
             <div class="desk-hero">
                 <div class="desk-hero-left">
                     <p class="desk-greeting" id="deskGreeting">Good evening, Nishu ✨</p>
@@ -833,6 +852,7 @@
                 <!-- Dynamically populated by openTopicMasterclass() -->
             </div>
         </div>
+    </div>
     <!-- ═══════════════════════════════════════════════ -->
     <!-- GITHUB CLOUD SYNC & DATA PERSISTENCE MODAL     -->
     <!-- ═══════════════════════════════════════════════ -->

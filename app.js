@@ -2516,6 +2516,7 @@ function checkAuth() {
         if (nav) nav.style.display = 'none';
         if (main) main.style.display = 'none';
         if (footer) footer.style.display = 'none';
+        if (adminBanner) adminBanner.style.display = 'none';
         return false;
     }
 
@@ -2593,19 +2594,52 @@ function handleLogin() {
     }
 }
 
-function handleLogout() {
-    if (!confirm('Are you sure you want to sign out of the portal?')) return;
-    localStorage.removeItem('nexa_auth_user');
+function handleLogout(event) {
+    if (event) {
+        if (typeof event.preventDefault === 'function') event.preventDefault();
+        if (typeof event.stopPropagation === 'function') event.stopPropagation();
+    }
+
+    try {
+        localStorage.removeItem('nexa_auth_user');
+        sessionStorage.removeItem('nexa_auth_user');
+    } catch (err) {
+        console.warn('Storage error during logout:', err);
+    }
     state.currentUser = null;
 
+    // Dismiss any active modals
+    const topicModal = document.getElementById('topicMasterclassModal');
+    if (topicModal) {
+        topicModal.style.display = 'none';
+        topicModal.classList.remove('active');
+    }
+    const syncModal = document.getElementById('syncModal');
+    if (syncModal) {
+        syncModal.style.display = 'none';
+        syncModal.classList.remove('active');
+    }
+
+    // Clear credential fields and errors
     const pwdEl = document.getElementById('authPassword');
     if (pwdEl) pwdEl.value = '';
 
     const errorEl = document.getElementById('authErrorMsg');
     if (errorEl) errorEl.style.display = 'none';
 
+    // Show Auth Screen & Hide main application
     checkAuth();
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Focus username input for quick re-login
+    setTimeout(() => {
+        const userEl = document.getElementById('authUsername');
+        if (userEl) userEl.focus();
+    }, 80);
 }
+window.handleLogout = handleLogout;
 
 function fillCredentials(username, password) {
     const userEl = document.getElementById('authUsername');
