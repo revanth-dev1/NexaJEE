@@ -1848,4 +1848,234 @@ const topicMasterclassData = {
     }
 };
 
+// ─── ACTIVE RECALL FLASHCARDS DATA ───────────────────
+const flashcardsData = [
+    // PHYSICS
+    {
+        id: "p1",
+        subject: "physics",
+        chapter: "Mechanics",
+        front: "Acceleration of an object rolling down an incline of angle θ without slipping?",
+        back: "a = (g · sin θ) / (1 + k²/R²)",
+        insight: "k²/R² is 2/5 for solid sphere, 1/2 for disc, 2/3 for hollow sphere, 1 for ring. Solid sphere is fastest!",
+        mnemonic: "Rolling fraction resists acceleration. Higher k²/R² = slower descent."
+    },
+    {
+        id: "p2",
+        subject: "physics",
+        chapter: "Electrostatics & Current",
+        front: "Energy stored in a capacitor & Energy density in an electric field?",
+        back: "U = ½ C V² = Q² / (2C) = ½ Q V\nu_E = ½ ε₀ E² (energy per unit volume)",
+        insight: "When connected to a battery: V = const. When battery is disconnected: Q = const.",
+        mnemonic: "CV is voltage-linked, Q²/2C is charge-linked."
+    },
+    {
+        id: "p3",
+        subject: "physics",
+        chapter: "Modern Physics",
+        front: "Einstein's Photoelectric Equation & Stopping Potential relation?",
+        back: "K_max = h ν - Φ = h c / λ - Φ\ne · V_s = K_max  ⇒  V_s = (h/e)ν - (Φ/e)",
+        insight: "Slope of V_s vs ν graph is ALWAYS h/e, identical for ALL metals! Intercept gives work function.",
+        mnemonic: "Energy supplied (hν) = Cost to escape (Φ) + Pocket cash (K_max)."
+    },
+    {
+        id: "p4",
+        subject: "physics",
+        chapter: "EMI & AC",
+        front: "Resonance frequency, Quality factor (Q), and Impedance in series LCR circuit?",
+        back: "ω₀ = 1 / √(LC)   (f₀ = 1 / (2π√LC))\nZ = R  at resonance (purely resistive, min Z, max I)\nQ = (ω₀ L) / R = (1 / R) · √(L / C)",
+        insight: "High Q factor means sharper resonance curve and superior frequency selectivity.",
+        mnemonic: "At resonance, Inductor and Capacitor cancel each other out completely: V_L = - V_C."
+    },
+    {
+        id: "p5",
+        subject: "physics",
+        chapter: "Optics",
+        front: "Fringe width in Young's Double Slit Experiment (YDSE) & Optical Path shift?",
+        back: "β = (λ · D) / d\nShift due to glass slab of thickness t and index μ: Δy = (μ - 1) t · (D / d)",
+        insight: "Fringe width β is unchanged when a slab is inserted — the ENTIRE pattern simply shifts toward the slab.",
+        mnemonic: "Blue light (smaller λ) gives narrower fringes; Red light (larger λ) gives wider fringes."
+    },
+    {
+        id: "p6",
+        subject: "physics",
+        chapter: "Thermodynamics",
+        front: "Efficiency of Carnot Engine & Coefficient of Performance (COP) of Refrigerator?",
+        back: "η_Carnot = 1 - (T_cold / T_hot) = (W / Q_hot)\nCOP_refrig = T_cold / (T_hot - T_cold) = Q_cold / W\nRelation: COP = (1 - η) / η",
+        insight: "Temperatures MUST strictly be in KELVIN (K = °C + 273.15). Never use Celsius!",
+        mnemonic: "Heat always flows downhill spontaneously; lifting it uphill costs Work."
+    },
+
+    // CHEMISTRY
+    {
+        id: "c1",
+        subject: "chemistry",
+        chapter: "Chemical Bonding",
+        front: "Molecular Orbital Theory: Bond Order formula & Magnetic Nature condition?",
+        back: "Bond Order = ½ · (N_b - N_a)\nParamagnetic = has unpaired electrons (e.g. O₂ with BO = 2, B₂ with BO = 1)\nDiamagnetic = all electrons paired (e.g. N₂ with BO = 3)",
+        insight: "For ≤ 14 electrons (N₂, C₂, B₂), π2px = π2py comes BEFORE σ2pz! For > 14 (O₂, F₂), σ2pz is lower in energy.",
+        mnemonic: "O₂ has 2 unpaired electrons in π*2px and π*2py — classic magnetic trap in JEE!"
+    },
+    {
+        id: "c2",
+        subject: "chemistry",
+        chapter: "Electrochemistry",
+        front: "Nernst Equation at 298 K (25°C) & Equilibrium Constant relation?",
+        back: "E_cell = E°_cell - (0.0591 / n) · log₁₀(Q)\nAt equilibrium: E_cell = 0  ⇒  E°_cell = (0.0591 / n) · log₁₀(K_eq)\nΔG° = - n F E°_cell",
+        insight: "n is the number of moles of electrons transferred in the balanced redox equation.",
+        mnemonic: "Spontaneous when E°_cell > 0 and ΔG° < 0."
+    },
+    {
+        id: "c3",
+        subject: "chemistry",
+        chapter: "Chemical Kinetics",
+        front: "First-Order Integrated Rate Law, Half-Life, and Arrhenius Equation?",
+        back: "k = (2.303 / t) · log₁₀( [A]₀ / [A]_t )\nt_1/2 = 0.693 / k  (INDEPENDENT of initial concentration!)\nk = A · e^(-Ea / RT)  ⇒  log₁₀(k2/k1) = (Ea / 2.303R) · [ (T2 - T1) / (T1·T2) ]",
+        insight: "Plot of ln k vs 1/T is linear with slope = - Ea / R.",
+        mnemonic: "In first order: 50% left at t1/2, 25% at 2·t1/2, 12.5% at 3·t1/2 (pure geometric progression)."
+    },
+    {
+        id: "c4",
+        subject: "chemistry",
+        chapter: "Organic: GOC & Mechanisms",
+        front: "Carbocation Stability order & when does rearrangement occur?",
+        back: "Stability: 3° Benzylic/Allylic > 3° Alkyl > 2° > 1° > Methyl\nRearrangement occurs via 1,2-Hydride shift or 1,2-Methyl shift whenever a more stable cation can form!",
+        insight: "Ring expansion from 4-membered → 5-membered and 5-membered → 6-membered is extremely exothermic and rapid.",
+        mnemonic: "Carbocations love company: resonance first, hyperconjugation second, inductive third."
+    },
+    {
+        id: "c5",
+        subject: "chemistry",
+        chapter: "Aldehydes/Ketones/Acids",
+        front: "Aldol Condensation vs Cannizzaro Reaction — What decides which occurs?",
+        back: "Aldol: MUST have at least one α-hydrogen (in dilute base e.g. NaOH) → β-hydroxy aldehyde → α,β-unsaturated compound upon heating.\nCannizzaro: NO α-hydrogen (e.g. HCHO, PhCHO) in concentrated base (50% KOH) → disproportionates into Alcohol + Carboxylate salt.",
+        insight: "Cross-Cannizzaro with HCHO always oxidizes HCHO to Formate (HCOO⁻) because HCHO is most electrophilic!",
+        mnemonic: "Alpha-H present = Aldol. Alpha-H absent = Cannizzaro."
+    },
+    {
+        id: "c6",
+        subject: "chemistry",
+        chapter: "Solutions",
+        front: "Van't Hoff factor (i) with Degree of Dissociation (α) and Association (β)?",
+        back: "Dissociation: i = 1 + (n - 1) α   [n = number of ions produced]\nAssociation: i = 1 + (1/n - 1) β   [n = polymer degree, e.g. dimer n=2]\nΔT_f = i · K_f · m   and   ΔT_b = i · K_b · m",
+        insight: "Benzoic acid in benzene forms dimers via H-bonding: n = 2, so i < 1!",
+        mnemonic: "Dissociation makes i > 1 (more particles); Association makes i < 1 (fewer particles)."
+    },
+
+    // MATHEMATICS
+    {
+        id: "m1",
+        subject: "maths",
+        chapter: "Calculus (Diff+Int)",
+        front: "King's Rule of Definite Integrals (The #1 JEE Integration Trick)?",
+        back: "∫[a to b] f(x) dx = ∫[a to b] f(a + b - x) dx\nSpecial case (0 to a): ∫[0 to a] f(x) dx = ∫[0 to a] f(a - x) dx",
+        insight: "Add the original integral I to the transformed integral I: 2I = ∫[a to b] [f(x) + f(a+b-x)] dx. 90% of times, the integrand simplifies to a constant 1!",
+        mnemonic: "Sum of limits minus x — King solves what algebra cannot."
+    },
+    {
+        id: "m2",
+        subject: "maths",
+        chapter: "3D & Vectors",
+        front: "Shortest Distance between two Skew Lines in 3D?",
+        back: "d = | (a2 - a1) · (b1 × b2) | / | b1 × b2 |\nWhere line 1: r = a1 + λ b1  and  line 2: r = a2 + μ b2",
+        insight: "If lines intersect, shortest distance d = 0, meaning (a2 - a1) · (b1 × b2) = 0 (the vectors are coplanar!).",
+        mnemonic: "Scalar triple product of (shift vector, direction 1, direction 2) divided by magnitude of cross product."
+    },
+    {
+        id: "m3",
+        subject: "maths",
+        chapter: "Coordinate Geometry",
+        front: "Condition of Tangency to standard Parabola, Ellipse, and Hyperbola?",
+        back: "Parabola y² = 4ax: c = a / m   (Line: y = mx + c)\nEllipse x²/a² + y²/b² = 1: c² = a² m² + b²\nHyperbola x²/a² - y²/b² = 1: c² = a² m² - b²",
+        insight: "Point of contact on parabola y² = 4ax with tangent y = mx + a/m is (a/m², 2a/m).",
+        mnemonic: "Parabola: a/m. Ellipse: +b². Hyperbola: -b²."
+    },
+    {
+        id: "m4",
+        subject: "maths",
+        chapter: "Matrices & Determinants",
+        front: "Properties of Adjoint & Determinants for an n×n matrix A?",
+        back: "| k · A | = kⁿ · | A |\n| adj(A) | = | A |^(n - 1)\n| adj(adj(A)) | = | A |^( (n - 1)² )\nA · adj(A) = adj(A) · A = | A | · I_n",
+        insight: "For 3×3 matrix (n = 3): |adj(A)| = |A|², and |adj(adj(A))| = |A|⁴.",
+        mnemonic: "Every 'adj' shaves 1 power off n. Double adj shaves squared power."
+    },
+    {
+        id: "m5",
+        subject: "maths",
+        chapter: "Probability & Stats",
+        front: "Bayes' Theorem for finding posterior probability P(E_i | A)?",
+        back: "P(E_i | A) = [ P(E_i) · P(A | E_i) ] / [ Σ P(E_k) · P(A | E_k) ]",
+        insight: "Denominator is simply the Law of Total Probability: P(A). Numerator is the favorable branch.",
+        mnemonic: "Numerator is the specific path you care about; Denominator is the sum of all paths that could produce event A."
+    },
+    {
+        id: "m6",
+        subject: "maths",
+        chapter: "Differential Equations",
+        front: "Integrating Factor (I.F.) and Solution for Linear 1st Order DE?",
+        back: "dy/dx + P(x) · y = Q(x)\nIntegrating Factor I.F. = e^( ∫ P(x) dx )\nGeneral Solution: y · (I.F.) = ∫ [ Q(x) · (I.F.) ] dx + C",
+        insight: "If coefficient of dy/dx is not 1, divide the entire equation by it FIRST before identifying P(x)!",
+        mnemonic: "y times I.F. equals integral of Q times I.F."
+    }
+];
+
+// ─── CLASSIC NTA TRAPS & MISTAKE MASTERCLASS ────────
+const classicTrapsData = [
+    {
+        id: "trap_1",
+        subject: "physics",
+        title: "Thermodynamic Work: Physics vs Chemistry Convention",
+        problem: "In an isothermal expansion of an ideal gas, is Work positive or negative?",
+        trap: "In Physics, W = + ∫ P dV (Work done BY the gas). When gas expands, ΔV > 0 so W > 0. In Chemistry (IUPAC), W = - P_ext ΔV (Work done ON the system). When gas expands, W_chem is NEGATIVE!",
+        prevention: "Always identify whether the question is from Physics paper (First Law: ΔQ = ΔU + W) or Chemistry paper (First Law: ΔU = q + w). Never mix them!",
+        frequency: "Appears every year in both Physics and Chemistry!"
+    },
+    {
+        id: "trap_2",
+        subject: "chemistry",
+        title: "Carbocation Rearrangement before Nucleophile Attack",
+        problem: "Addition of HBr to 3,3-dimethyl-1-butene does NOT yield 2-bromo-3,3-dimethylbutane as major product.",
+        trap: "Students add H⁺ to form a secondary carbocation at C-2 and immediately attach Br⁻ there. But carbocations rearrange! A 1,2-methyl shift occurs instantly to convert the 2° cation into a far more stable 3° carbocation at C-3.",
+        prevention: "Whenever a carbocation intermediate is formed, STOP! Look at adjacent carbons: Can a 1,2-hydride or 1,2-methyl shift create a tertiary or resonance-stabilized cation? If yes, rearrange first!",
+        frequency: "9 out of 10 years in Organic JEE Main"
+    },
+    {
+        id: "trap_3",
+        subject: "maths",
+        title: "Inverse Trig Range Blindness: sin⁻¹(sin x) ≠ x",
+        problem: "Evaluate sin⁻¹(sin(2π/3)) and cos⁻¹(cos(7π/6)).",
+        trap: "Blindly canceling sin⁻¹ and sin to write 2π/3! But the principal range of sin⁻¹ is strictly [-π/2, π/2], and 2π/3 lies OUTSIDE this range!",
+        prevention: "sin(2π/3) = sin(π - π/3) = sin(π/3). Therefore, sin⁻¹(sin(π/3)) = π/3. For cos⁻¹, range is [0, π], so cos⁻¹(cos(7π/6)) = cos⁻¹(cos(2π - 5π/6)) = 5π/6.",
+        frequency: "Tested every single year in Math Session 1 & 2"
+    },
+    {
+        id: "trap_4",
+        subject: "physics",
+        title: "Direction of Friction in Pure Rolling",
+        problem: "A cylinder rolls down an incline without slipping. Which way does friction act, and does it dissipate mechanical energy?",
+        trap: "Students think friction always opposes motion and dissipates energy into heat. Here, friction acts UP the incline to provide clockwise torque, and because the contact point doesn't slide, static friction does ZERO work!",
+        prevention: "Static friction in pure rolling conserves mechanical energy! E_initial = E_final. For a driven car rear wheel, friction acts FORWARD; for front rolling wheel, friction acts BACKWARD.",
+        frequency: "8 out of 10 years in Mechanics"
+    },
+    {
+        id: "trap_5",
+        subject: "maths",
+        title: "Applying L'Hôpital's Rule to Non-Indeterminate Forms",
+        problem: "Evaluate lim (x → 0) (cos x / x).",
+        trap: "Applying L'Hôpital blindly: differentiating top gives -sin x, bottom gives 1, getting 0! But cos(0)/0 is 1/0, which is NOT an indeterminate form (0/0 or ∞/∞). L'Hôpital is illegal here!",
+        prevention: "ALWAYS test the limits first! L'Hôpital is strictly prohibited unless numerator and denominator both evaluate to 0 or both evaluate to ±∞.",
+        frequency: "Classic negative marking trap in Calculus"
+    },
+    {
+        id: "trap_6",
+        subject: "physics",
+        title: "Discharging a Capacitor into Another: The 50% Energy Paradox",
+        problem: "A capacitor C charged to V is connected in parallel to an identical uncharged capacitor C. What fraction of energy is lost?",
+        trap: "Students calculate Q = C V, common potential V' = V/2, final energy = ½(2C)(V/2)² = ¼ C V². Initial was ½ C V². Half the energy vanished! Where did it go if the connecting wires have zero resistance?",
+        prevention: "Exactly 50% of the energy is ALWAYS lost, regardless of resistance! If R → 0, the energy radiates away as electromagnetic waves and spark. ΔU_loss = ½ [C1·C2 / (C1 + C2)] (V1 - V2)².",
+        frequency: "High-yield numerical in Electrostatics"
+    }
+];
+
+
 

@@ -34,6 +34,11 @@
             </div>
         </div>
         <div class="header-right">
+            <div class="focus-timer-pill" id="focusTimerPill" onclick="toggleFocusTimer()" title="Click to Start/Pause Deep Work Focus Timer">
+                <span class="focus-timer-icon" id="focusTimerIcon">⏱️</span>
+                <span class="focus-timer-time" id="focusTimerDisplay">50:00</span>
+                <span class="focus-timer-label" id="focusTimerLabel">Sprint</span>
+            </div>
             <div class="streak-badge" id="streakBadge">
                 <span class="streak-icon">🔥</span>
                 <span class="streak-count" id="streakCount">0</span>
@@ -64,6 +69,12 @@
             </button>
             <button class="nav-pill" data-section="formulas" id="nav-formulas">
                 <span class="nav-icon">📐</span> Formulas
+            </button>
+            <button class="nav-pill" data-section="flashcards" id="nav-flashcards">
+                <span class="nav-icon">🧠</span> Flashcards
+            </button>
+            <button class="nav-pill" data-section="mistakes" id="nav-mistakes">
+                <span class="nav-icon">📕</span> Mistake Diary
             </button>
             <button class="nav-pill" data-section="pyq" id="nav-pyq">
                 <span class="nav-icon">📝</span> PYQ Analysis
@@ -419,6 +430,173 @@
                 <div class="doubt-input-area">
                     <input type="text" class="doubt-input" id="doubtInput" placeholder="Type your doubt here..." onkeypress="if(event.key==='Enter') sendDoubt()">
                     <button class="doubt-send" onclick="sendDoubt()">Send</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════ ACTIVE RECALL FLASHCARDS SECTION ═══════════ -->
+        <section class="section section-flashcards" id="section-flashcards">
+            <h2 class="section-heading">Active Recall Flashcards 🧠</h2>
+            <p class="section-sub">Spaced-repetition powered active recall. Tap to flip and test your instantaneous formula recall under pressure!</p>
+
+            <div class="flashcards-toolbar">
+                <div class="flashcard-filters">
+                    <button class="filter-pill active" data-subject="all" onclick="filterFlashcards('all')">All (<span id="fcCountAll">18</span>)</button>
+                    <button class="filter-pill" data-subject="physics" onclick="filterFlashcards('physics')">⚛️ Physics</button>
+                    <button class="filter-pill" data-subject="chemistry" onclick="filterFlashcards('chemistry')">🧪 Chemistry</button>
+                    <button class="filter-pill" data-subject="maths" onclick="filterFlashcards('maths')">📊 Maths</button>
+                </div>
+                <div class="flashcard-progress-box">
+                    <span class="flashcard-mastery-text" id="fcMasteryText">Mastered: 0 / 18 (0%)</span>
+                    <div class="flashcard-progress-bar">
+                        <div class="flashcard-progress-fill" id="fcProgressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Flashcard Display Area -->
+            <div class="flashcard-stage">
+                <div class="flashcard-card-wrapper" id="flashcardWrapper" onclick="flipActiveFlashcard()">
+                    <div class="flashcard-inner" id="flashcardInner">
+                        <!-- Front Face -->
+                        <div class="flashcard-face flashcard-front">
+                            <div class="flashcard-top">
+                                <span class="flashcard-badge" id="fcSubjectBadge">PHYSICS</span>
+                                <span class="flashcard-chapter" id="fcChapterText">Mechanics</span>
+                            </div>
+                            <div class="flashcard-center">
+                                <div class="flashcard-icon">❓</div>
+                                <h3 class="flashcard-prompt" id="fcPromptText">Loading flashcard prompt...</h3>
+                            </div>
+                            <div class="flashcard-bottom">
+                                <span class="flashcard-flip-hint">👆 Click anywhere to flip & reveal formula</span>
+                            </div>
+                        </div>
+
+                        <!-- Back Face -->
+                        <div class="flashcard-face flashcard-back">
+                            <div class="flashcard-top">
+                                <span class="flashcard-badge back-badge" id="fcSubjectBadgeBack">FACULTY SOLUTION</span>
+                                <span class="flashcard-chapter" id="fcChapterTextBack">Formula & Insight</span>
+                            </div>
+                            <div class="flashcard-center">
+                                <div class="flashcard-formula-box" id="fcFormulaText">Formula loading...</div>
+                                <div class="flashcard-insight" id="fcInsightText">Insight loading...</div>
+                                <div class="flashcard-mnemonic" id="fcMnemonicText">Mnemonic loading...</div>
+                            </div>
+                            <div class="flashcard-bottom">
+                                <span class="flashcard-flip-hint">👆 Click to flip back to question</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flashcard Controls -->
+                <div class="flashcard-controls">
+                    <button class="btn-fc-nav" onclick="prevFlashcard()" title="Previous Card">← Prev</button>
+                    <div class="flashcard-rating-buttons">
+                        <button class="btn-fc-rate hard" onclick="rateActiveFlashcard('hard')">🔴 Hard / Review</button>
+                        <button class="btn-fc-rate medium" onclick="rateActiveFlashcard('medium')">🟡 Felt Tough</button>
+                        <button class="btn-fc-rate mastered" onclick="rateActiveFlashcard('mastered')">🟢 Mastered! (Known)</button>
+                    </div>
+                    <button class="btn-fc-nav" onclick="nextFlashcard()" title="Next Card">Next →</button>
+                </div>
+                <div class="flashcard-counter" id="fcCounterText">Card 1 of 18</div>
+            </div>
+        </section>
+
+        <!-- ═══════════ IITian MISTAKE DIARY SECTION ═══════════ -->
+        <section class="section section-mistakes" id="section-mistakes">
+            <h2 class="section-heading">IITian Mistake Diary & NTA Trap Vault 📕</h2>
+            <p class="section-sub">"Toppers don't solve 10,000 extra questions; they never repeat the same mistake twice." Track your errors and inspect classic NTA traps.</p>
+
+            <!-- Mistake Diary Stats -->
+            <div class="mistakes-stats-row">
+                <div class="mistake-stat-card">
+                    <span class="mistake-stat-num" id="mistakeTotalCount">0</span>
+                    <span class="mistake-stat-label">Logged Errors</span>
+                </div>
+                <div class="mistake-stat-card">
+                    <span class="mistake-stat-num" id="mistakeResolvedPercent">0%</span>
+                    <span class="mistake-stat-label">Resolution Rate</span>
+                </div>
+                <div class="mistake-stat-card highlight">
+                    <span class="mistake-stat-num" id="mistakeTopPattern">—</span>
+                    <span class="mistake-stat-label">Top Vulnerability</span>
+                </div>
+            </div>
+
+            <!-- Tab Switcher: Classic Traps vs My Error Log -->
+            <div class="mistakes-tab-row">
+                <button class="mistakes-tab active" id="tabTrapsBtn" onclick="switchMistakeTab('traps')">⚠️ Infamous NTA Traps (Faculty Vault)</button>
+                <button class="mistakes-tab" id="tabLogBtn" onclick="switchMistakeTab('log')">📝 My Personal Error Diary (<span id="userMistakeCount">0</span>)</button>
+            </div>
+
+            <!-- Tab 1: Classic Traps Vault -->
+            <div class="mistakes-tab-content active" id="mistakesTrapsContent">
+                <div class="traps-grid" id="trapsGrid">
+                    <!-- Populated by JS from classicTrapsData -->
+                </div>
+            </div>
+
+            <!-- Tab 2: User Personal Error Log -->
+            <div class="mistakes-tab-content" id="mistakesLogContent">
+                <div class="mistake-log-actions">
+                    <button class="btn-primary" onclick="toggleMistakeForm()">➕ Log a New Mistake</button>
+                </div>
+
+                <!-- Add Mistake Form (Collapsible) -->
+                <div class="mistake-form-card" id="mistakeFormCard" style="display:none;">
+                    <h3 style="font-size:16px; margin-bottom:12px; color:var(--accent-teal);">📝 Log an Error for Review</h3>
+                    <div class="mistake-form-grid">
+                        <div class="form-group">
+                            <label>Subject</label>
+                            <select id="mFormSubject" class="mistake-select">
+                                <option value="physics">⚛️ Physics</option>
+                                <option value="chemistry">🧪 Chemistry</option>
+                                <option value="maths">📊 Maths</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Chapter / Topic</label>
+                            <input type="text" id="mFormChapter" class="mistake-input" placeholder="e.g. Rotational Motion or King's Rule">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Question Summary / What was asked?</label>
+                            <input type="text" id="mFormQuestion" class="mistake-input" placeholder="e.g. Question on cylinder rolling down incline with friction">
+                        </div>
+                        <div class="form-group">
+                            <label>Error Type (Root Cause)</label>
+                            <select id="mFormType" class="mistake-select">
+                                <option value="Calculation / Sign Error">⚡ Calculation / Sign Error</option>
+                                <option value="Conceptual Gap">🛑 Conceptual Gap (Didn't know theory)</option>
+                                <option value="Fell for NTA Trap">🚨 Fell for NTA Trick / Wording Trap</option>
+                                <option value="Formula Forgotten">📐 Formula Forgotten / Half-Remembered</option>
+                                <option value="Exam Panic / Rush">⏱️ Time Rush / Panicked</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>What is the golden rule to NEVER repeat this?</label>
+                            <textarea id="mFormLesson" class="mistake-textarea" rows="2" placeholder="e.g. Always check whether friction is static or kinetic before assuming f = μN!"></textarea>
+                        </div>
+                    </div>
+                    <div class="mistake-form-buttons">
+                        <button class="btn-primary" onclick="saveUserMistake()">Save to Error Diary</button>
+                        <button class="btn-secondary" onclick="toggleMistakeForm()">Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Filter Row -->
+                <div class="mistake-filter-row">
+                    <span style="font-size:13px; color:var(--text-muted);">Filter by Status:</span>
+                    <button class="filter-pill active" id="mfAll" onclick="filterUserMistakes('all')">All</button>
+                    <button class="filter-pill" id="mfPending" onclick="filterUserMistakes('pending')">Pending Review</button>
+                    <button class="filter-pill" id="mfMastered" onclick="filterUserMistakes('mastered')">Mastered ✓</button>
+                </div>
+
+                <!-- List of Logged Mistakes -->
+                <div class="user-mistakes-list" id="userMistakesList">
+                    <!-- Populated dynamically -->
                 </div>
             </div>
         </section>

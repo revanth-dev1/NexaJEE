@@ -15,6 +15,9 @@ let state = {
     doubtsAsked: 0,
     formulasViewed: 0,
     mockState: null, // active mock test state
+    userMistakes: [],
+    flashcardsMastery: {}, // card id -> 'hard' | 'medium' | 'mastered'
+    focusTimerSessions: 0
 };
 
 // Load saved state
@@ -31,6 +34,9 @@ function loadState() {
             state.lastVisit = parsed.lastVisit || null;
             state.doubtsAsked = parsed.doubtsAsked || 0;
             state.formulasViewed = parsed.formulasViewed || 0;
+            state.userMistakes = parsed.userMistakes || [];
+            state.flashcardsMastery = parsed.flashcardsMastery || {};
+            state.focusTimerSessions = parsed.focusTimerSessions || 0;
         }
     } catch (e) { console.log('State load error:', e); }
 }
@@ -46,6 +52,9 @@ function saveState() {
             lastVisit: state.lastVisit,
             doubtsAsked: state.doubtsAsked,
             formulasViewed: state.formulasViewed,
+            userMistakes: state.userMistakes,
+            flashcardsMastery: state.flashcardsMastery,
+            focusTimerSessions: state.focusTimerSessions
         }));
     } catch (e) { console.log('State save error:', e); }
 }
@@ -70,6 +79,8 @@ function navigateTo(section) {
     // Lazy render
     if (section === 'chapters' && !document.querySelector('.chapter-card')) renderChapters('all');
     if (section === 'formulas' && !document.querySelector('.formula-chapter')) renderFormulas('all');
+    if (section === 'flashcards') initFlashcards();
+    if (section === 'mistakes') initMistakeDiary();
     if (section === 'pyq' && !document.querySelector('.pyq-chapter-row')) showPYQ('physics');
     if (section === 'cheats' && !document.querySelector('.cheat-card')) showCheatSheet('tricks');
     if (section === 'badges') renderBadges();
@@ -1554,6 +1565,418 @@ function downloadExcel() {
     saveState();
 }
 
+// ─── DEEP-WORK SPRINT FOCUS TIMER ───────────────
+let focusTimerInterval = null;
+let focusTimerSeconds = 50 * 60; // 50-minute deep work sprint
+let focusTimerRunning = false;
+let focusTimerIsBreak = false;
+
+function toggleFocusTimer() {
+    const pill = document.getElementById('focusTimerPill');
+    const label = document.getElementById('focusTimerLabel');
+    const icon = document.getElementById('focusTimerIcon');
+
+    if (focusTimerRunning) {
+        // Pause
+        clearInterval(focusTimerInterval);
+        focusTimerRunning = false;
+        if (pill) pill.classList.remove('running');
+        if (label) label.textContent = 'Paused';
+        if (icon) icon.textContent = '⏸️';
+    } else {
+        // Start / Resume
+        focusTimerRunning = true;
+        if (pill) pill.classList.add('running');
+        if (label) label.textContent = focusTimerIsBreak ? 'Break' : 'Focusing';
+        if (icon) icon.textContent = focusTimerIsBreak ? '☕' : '🔥';
+
+        focusTimerInterval = setInterval(() => {
+            if (focusTimerSeconds > 0) {
+                focusTimerSeconds--;
+                updateFocusTimerDisplay();
+            } else {
+                // Timer finished
+                clearInterval(focusTimerInterval);
+                focusTimerRunning = false;
+                if (pill) pill.classList.remove('running');
+
+                if (!focusTimerIsBreak) {
+                    // Completed a 50m focus sprint!
+                    state.focusTimerSessions = (state.focusTimerSessions || 0) + 1;
+                    addXP(25);
+                    saveState();
+                    alert("🎉 Outstanding work, Nishu! You completed a full 50-minute Deep-Work Sprint (+25 XP). Enjoy a 10-minute relaxation break.");
+                    focusTimerIsBreak = true;
+                    focusTimerSeconds = 10 * 60;
+                    if (label) label.textContent = 'Break';
+                    if (icon) icon.textContent = '☕';
+                } else {
+                    // Completed break
+                    alert("🔔 Break over, champion! Ready for another focused sprint?");
+                    focusTimerIsBreak = false;
+                    focusTimerSeconds = 50 * 60;
+                    if (label) label.textContent = 'Sprint';
+                    if (icon) icon.textContent = '⏱️';
+                }
+                updateFocusTimerDisplay();
+            }
+        }, 1000);
+    }
+}
+
+function updateFocusTimerDisplay() {
+    const display = document.getElementById('focusTimerDisplay');
+    if (!display) return;
+    const mins = Math.floor(focusTimerSeconds / 60);
+    const secs = focusTimerSeconds % 60;
+    display.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+// ─── ACTIVE RECALL FORMULA FLASHCARDS ───────────
+let fcActiveIndex = 0;
+let fcCurrentList = [];
+let fcFilter = 'all';
+
+function initFlashcards() {
+    if (typeof flashcardsData === 'undefined') return;
+
+    if (fcFilter === 'all') {
+        fcCurrentList = [...flashcardsData];
+    } else {
+        fcCurrentList = flashcardsData.filter(c => c.subject === fcFilter);
+    }
+
+    if (fcActiveIndex >= fcCurrentList.length) {
+        fcActiveIndex = 0;
+    }
+
+    // Update count badge
+    const totalCountEl = document.getElementById('fcCountAll');
+    if (totalCountEl) totalCountEl.textContent = flashcardsData.length;
+
+    renderActiveFlashcard();
+    updateFlashcardMasteryStats();
+}
+
+function filterFlashcards(subject) {
+    fcFilter = subject;
+    fcActiveIndex = 0;
+
+    document.querySelectorAll('.flashcard-filters .filter-pill').forEach(pill => {
+        pill.classList.toggle('active', pill.dataset.subject === subject);
+    });
+
+    initFlashcards();
+}
+
+function renderActiveFlashcard() {
+    const wrapper = document.getElementById('flashcardWrapper');
+    if (wrapper) wrapper.classList.remove('flipped');
+
+    if (!fcCurrentList || fcCurrentList.length === 0) return;
+    const card = fcCurrentList[fcActiveIndex];
+    if (!card) return;
+
+    // Elements
+    const badgeFront = document.getElementById('fcSubjectBadge');
+    const badgeBack = document.getElementById('fcSubjectBadgeBack');
+    const chapFront = document.getElementById('fcChapterText');
+    const chapBack = document.getElementById('fcChapterTextBack');
+    const promptText = document.getElementById('fcPromptText');
+    const formulaText = document.getElementById('fcFormulaText');
+    const insightText = document.getElementById('fcInsightText');
+    const mnemonicText = document.getElementById('fcMnemonicText');
+    const counterText = document.getElementById('fcCounterText');
+
+    if (badgeFront) badgeFront.textContent = card.subject.toUpperCase();
+    if (badgeBack) badgeBack.textContent = card.subject.toUpperCase() + ' · FACULTY PRO-TIP';
+    if (chapFront) chapFront.textContent = card.chapter;
+    if (chapBack) chapBack.textContent = card.chapter;
+    if (promptText) promptText.textContent = card.front;
+    if (formulaText) formulaText.textContent = card.back;
+    if (insightText) insightText.innerHTML = `💡 <strong>Faculty Insight:</strong> ${card.insight}`;
+    if (mnemonicText) mnemonicText.innerHTML = `🧠 <strong>Recall Key:</strong> ${card.mnemonic}`;
+
+    const currentMastery = state.flashcardsMastery[card.id];
+    const statusLabel = currentMastery === 'mastered' ? '🟢 Mastered' : currentMastery === 'medium' ? '🟡 Reviewing' : currentMastery === 'hard' ? '🔴 Needs Practice' : '⚪ Unrated';
+
+    if (counterText) {
+        counterText.textContent = `Card ${fcActiveIndex + 1} of ${fcCurrentList.length} · ${statusLabel}`;
+    }
+}
+
+function flipActiveFlashcard() {
+    const wrapper = document.getElementById('flashcardWrapper');
+    if (wrapper) {
+        wrapper.classList.toggle('flipped');
+    }
+}
+
+function nextFlashcard() {
+    if (!fcCurrentList || fcCurrentList.length === 0) return;
+    fcActiveIndex = (fcActiveIndex + 1) % fcCurrentList.length;
+    renderActiveFlashcard();
+}
+
+function prevFlashcard() {
+    if (!fcCurrentList || fcCurrentList.length === 0) return;
+    fcActiveIndex = (fcActiveIndex - 1 + fcCurrentList.length) % fcCurrentList.length;
+    renderActiveFlashcard();
+}
+
+function rateActiveFlashcard(rating) {
+    if (!fcCurrentList || fcCurrentList.length === 0) return;
+    const card = fcCurrentList[fcActiveIndex];
+    if (!card) return;
+
+    const prevRating = state.flashcardsMastery[card.id];
+    state.flashcardsMastery[card.id] = rating;
+
+    if (rating === 'mastered' && prevRating !== 'mastered') {
+        addXP(5);
+    }
+    saveState();
+    updateFlashcardMasteryStats();
+
+    // Advance card with smooth transition
+    setTimeout(() => {
+        nextFlashcard();
+    }, 250);
+}
+
+function updateFlashcardMasteryStats() {
+    if (typeof flashcardsData === 'undefined') return;
+    const total = flashcardsData.length;
+    let masteredCount = 0;
+    flashcardsData.forEach(c => {
+        if (state.flashcardsMastery[c.id] === 'mastered') masteredCount++;
+    });
+
+    const pct = Math.round((masteredCount / total) * 100);
+    const masteryText = document.getElementById('fcMasteryText');
+    const progressFill = document.getElementById('fcProgressFill');
+
+    if (masteryText) masteryText.textContent = `Mastered: ${masteredCount} / ${total} (${pct}%)`;
+    if (progressFill) progressFill.style.width = `${pct}%`;
+}
+
+// ─── IITian MISTAKE DIARY & NTA TRAP VAULT ─────────
+let currentMistakeTab = 'traps';
+let currentMistakeFilter = 'all';
+
+function initMistakeDiary() {
+    renderTraps();
+    renderUserMistakes(currentMistakeFilter);
+    updateMistakeStats();
+}
+
+function renderTraps() {
+    const grid = document.getElementById('trapsGrid');
+    if (!grid || typeof classicTrapsData === 'undefined') return;
+
+    grid.innerHTML = classicTrapsData.map(trap => `
+        <div class="trap-card">
+            <div class="trap-card-header">
+                <span class="trap-subject-badge subject-tag ${trap.subject}">${trap.subject.toUpperCase()}</span>
+                <span class="trap-freq-badge">⚠️ ${trap.frequency}</span>
+            </div>
+            <h3 class="trap-title">${trap.title}</h3>
+            <div class="trap-problem-box">
+                <strong>📌 The Problem Scenario:</strong><br>${trap.problem}
+            </div>
+            <div class="trap-danger-box">
+                <strong>🚨 The NTA Trick / Student Instinct Mistake:</strong><br>${trap.trap}
+            </div>
+            <div class="trap-prevention-box">
+                <strong>💡 IITian Master Rule:</strong><br>${trap.prevention}
+            </div>
+        </div>
+    `).join('');
+}
+
+function switchMistakeTab(tab) {
+    currentMistakeTab = tab;
+    const trapsBtn = document.getElementById('tabTrapsBtn');
+    const logBtn = document.getElementById('tabLogBtn');
+    const trapsContent = document.getElementById('mistakesTrapsContent');
+    const logContent = document.getElementById('mistakesLogContent');
+
+    if (trapsBtn) trapsBtn.classList.toggle('active', tab === 'traps');
+    if (logBtn) logBtn.classList.toggle('active', tab === 'log');
+    if (trapsContent) trapsContent.classList.toggle('active', tab === 'traps');
+    if (logContent) logContent.classList.toggle('active', tab === 'log');
+
+    if (tab === 'log') {
+        renderUserMistakes(currentMistakeFilter);
+        updateMistakeStats();
+    }
+}
+
+function toggleMistakeForm() {
+    const formCard = document.getElementById('mistakeFormCard');
+    if (!formCard) return;
+    const isHidden = formCard.style.display === 'none' || formCard.style.display === '';
+    formCard.style.display = isHidden ? 'block' : 'none';
+}
+
+function saveUserMistake() {
+    const subjEl = document.getElementById('mFormSubject');
+    const chapEl = document.getElementById('mFormChapter');
+    const questEl = document.getElementById('mFormQuestion');
+    const typeEl = document.getElementById('mFormType');
+    const lessonEl = document.getElementById('mFormLesson');
+
+    if (!chapEl || !lessonEl) return;
+    const chapter = chapEl.value.trim();
+    const lesson = lessonEl.value.trim();
+    const question = questEl ? questEl.value.trim() : '';
+
+    if (!chapter || !lesson) {
+        alert("Please provide the Chapter/Topic name and your Golden Rule / Lesson!");
+        return;
+    }
+
+    const newMistake = {
+        id: 'mistake_' + Date.now(),
+        subject: subjEl ? subjEl.value : 'physics',
+        chapter: chapter,
+        question: question || 'Self-study / Mock test problem',
+        errorType: typeEl ? typeEl.value : 'Conceptual Gap',
+        lesson: lesson,
+        status: 'pending',
+        date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+    };
+
+    state.userMistakes.unshift(newMistake);
+    addXP(10);
+    saveState();
+
+    // Reset inputs
+    chapEl.value = '';
+    if (questEl) questEl.value = '';
+    if (lessonEl) lessonEl.value = '';
+
+    toggleMistakeForm();
+    renderUserMistakes(currentMistakeFilter);
+    updateMistakeStats();
+}
+
+function filterUserMistakes(filter) {
+    currentMistakeFilter = filter;
+    document.querySelectorAll('.mistake-filter-row .filter-pill').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    if (filter === 'all') document.getElementById('mfAll')?.classList.add('active');
+    if (filter === 'pending') document.getElementById('mfPending')?.classList.add('active');
+    if (filter === 'mastered') document.getElementById('mfMastered')?.classList.add('active');
+
+    renderUserMistakes(filter);
+}
+
+function renderUserMistakes(filter = 'all') {
+    const list = document.getElementById('userMistakesList');
+    if (!list) return;
+
+    let items = state.userMistakes || [];
+    if (filter === 'pending') items = items.filter(m => m.status !== 'mastered');
+    if (filter === 'mastered') items = items.filter(m => m.status === 'mastered');
+
+    if (items.length === 0) {
+        list.innerHTML = `
+            <div style="text-align:center; padding: 32px 16px; background:var(--bg-card); border-radius:var(--radius-md); border:1px dashed var(--border-subtle); color:var(--text-muted);">
+                <div style="font-size:32px; margin-bottom:8px;">📕</div>
+                <p style="font-size:14px; margin-bottom:6px;">No mistakes found in this filter.</p>
+                <p style="font-size:12px; color:var(--text-secondary);">"The difference between an average student and an AIR &lt; 1000 is how zealously they track and review their mistakes."</p>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = items.map(m => `
+        <div class="user-mistake-card ${m.status === 'mastered' ? 'resolved' : ''}">
+            <div class="user-mistake-header">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="subject-tag ${m.subject}">${m.subject.toUpperCase()}</span>
+                    <span class="user-mistake-title">${m.chapter}</span>
+                </div>
+                <span class="user-mistake-type-pill">${m.errorType}</span>
+            </div>
+            <p style="font-size:13.5px; color:var(--text-secondary); margin:0;"><strong>Q:</strong> ${m.question}</p>
+            <div class="user-mistake-lesson">
+                <strong>🛡️ Golden Rule (Never Repeat):</strong> ${m.lesson}
+            </div>
+            <div class="user-mistake-footer">
+                <span style="font-size:11.5px; color:var(--text-muted);">${m.date} · Status: <strong>${m.status === 'mastered' ? '🟢 Mastered (Immune)' : '⏳ Pending Review'}</strong></span>
+                <div style="display:flex; gap:12px;">
+                    <button class="btn-mistake-action" onclick="toggleResolveMistake('${m.id}')">
+                        ${m.status === 'mastered' ? '↩ Re-test Error' : '✓ Mark Immune / Mastered'}
+                    </button>
+                    <button class="btn-mistake-action delete" onclick="deleteUserMistake('${m.id}')">🗑️ Remove</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function toggleResolveMistake(id) {
+    const m = state.userMistakes.find(item => item.id === id);
+    if (!m) return;
+
+    if (m.status === 'mastered') {
+        m.status = 'pending';
+    } else {
+        m.status = 'mastered';
+        addXP(15);
+    }
+
+    saveState();
+    renderUserMistakes(currentMistakeFilter);
+    updateMistakeStats();
+}
+
+function deleteUserMistake(id) {
+    if (!confirm("Are you sure you want to remove this error log?")) return;
+    state.userMistakes = state.userMistakes.filter(m => m.id !== id);
+    saveState();
+    renderUserMistakes(currentMistakeFilter);
+    updateMistakeStats();
+}
+
+function updateMistakeStats() {
+    const mistakes = state.userMistakes || [];
+    const total = mistakes.length;
+    const resolved = mistakes.filter(m => m.status === 'mastered').length;
+    const pct = total === 0 ? 0 : Math.round((resolved / total) * 100);
+
+    const totalEl = document.getElementById('mistakeTotalCount');
+    const resEl = document.getElementById('mistakeResolvedPercent');
+    const topEl = document.getElementById('mistakeTopPattern');
+    const userCountEl = document.getElementById('userMistakeCount');
+
+    if (totalEl) totalEl.textContent = total;
+    if (resEl) resEl.textContent = pct + '%';
+    if (userCountEl) userCountEl.textContent = total;
+
+    if (mistakes.length === 0) {
+        if (topEl) topEl.textContent = 'None yet';
+    } else {
+        const counts = {};
+        mistakes.forEach(m => {
+            counts[m.errorType] = (counts[m.errorType] || 0) + 1;
+        });
+        let maxCount = 0;
+        let topPattern = 'None';
+        for (const [type, count] of Object.entries(counts)) {
+            if (count > maxCount) {
+                maxCount = count;
+                topPattern = type;
+            }
+        }
+        const short = topPattern.split('/')[0].trim();
+        if (topEl) topEl.textContent = short;
+    }
+}
+
 // ─── INITIALIZATION ─────────────────────────────
 function init() {
     loadState();
@@ -1562,6 +1985,7 @@ function init() {
     updateProgress();
     earnBadge('first_login');
     renderMockHistory();
+    updateFocusTimerDisplay();
     
     // Auto-render sections on first load
     renderChapters('all');
