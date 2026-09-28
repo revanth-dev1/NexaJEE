@@ -1,0 +1,50 @@
+{
+  "student": "Nishu Kumari",
+  "target": "JEE Main 2027",
+  "lastUpdated": "2026-09-28T15:55:00+05:30",
+  "syllabusProgress": {
+    "totalChapters": 30,
+    "completedChapters": 0,
+    "completedList": [],
+    "physics": {
+      "total": 11,
+      "completed": 0,
+      "percentage": 0
+    },
+    "chemistry": {
+      "total": 8,
+      "completed": 0,
+      "percentage": 0
+    },
+    "mathematics": {
+      "total": 11,
+      "completed": 0,
+      "percentage": 0
+    },
+    "overallPercentage": 0
+  },
+  "studyMetrics": {
+    "xp": 50,
+    "streakDays": 1,
+    "focusTimerSessions": 0,
+    "doubtsAsked": 0,
+    "formulasViewed": 0
+  },
+  "mockTests": {
+    "testsTaken": 0,
+    "averagePercentage": 0,
+    "history": []
+  },
+  "flashcards": {
+    "totalCards": 18,
+    "masteredCount": 0,
+    "masteryMap": {}
+  },
+  "mistakeDiary": {
+    "totalErrorsLogged": 0,
+    "masteredCount": 0,
+    "resolutionRate": "0%",
+    "topVulnerability": "None",
+    "entries": []
+  }
+}
