@@ -1,50 +1,60 @@
 {
   "student": "Nishu Kumari",
   "target": "JEE Main 2027",
-  "lastUpdated": "2026-09-28T15:55:00+05:30",
-  "syllabusProgress": {
+  "lastUpdated": "2026-09-28T11:40:14.423Z",
+  "lastUpdatedFormatted": "28/9/2026, 5:10:14 pm",
+  "status": "Live Tracking Active",
+  "overallProgress": {
     "totalChapters": 30,
-    "completedChapters": 0,
-    "completedList": [],
+    "completedChapters": 1,
+    "percentage": 3,
     "physics": {
       "total": 11,
-      "completed": 0,
-      "percentage": 0
+      "completed": 1,
+      "percentage": 9,
+      "completedList": [
+        "Mechanics"
+      ]
     },
     "chemistry": {
       "total": 8,
       "completed": 0,
-      "percentage": 0
+      "percentage": 0,
+      "completedList": []
     },
     "mathematics": {
       "total": 11,
       "completed": 0,
-      "percentage": 0
-    },
-    "overallPercentage": 0
+      "percentage": 0,
+      "completedList": []
+    }
   },
-  "studyMetrics": {
-    "xp": 50,
+  "studyEffort": {
+    "xp": 75,
     "streakDays": 1,
-    "focusTimerSessions": 0,
+    "focusSessions": 1,
+    "focusMinutes": 50,
     "doubtsAsked": 0,
-    "formulasViewed": 0
+    "formulasViewed": 12
   },
   "mockTests": {
-    "testsTaken": 0,
-    "averagePercentage": 0,
+    "totalAttempted": 0,
+    "averageScore": 0,
+    "bestScore": 0,
     "history": []
   },
   "flashcards": {
-    "totalCards": 18,
-    "masteredCount": 0,
-    "masteryMap": {}
+    "total": 18,
+    "mastered": 2,
+    "reviewing": 1,
+    "hard": 0,
+    "masteryPercentage": 11
   },
   "mistakeDiary": {
-    "totalErrorsLogged": 0,
-    "masteredCount": 0,
+    "totalLogged": 1,
+    "masteredImmune": 0,
     "resolutionRate": "0%",
-    "topVulnerability": "None",
-    "entries": []
+    "topVulnerability": "Conceptual Gap",
+    "recentEntries": []
   }
 }
